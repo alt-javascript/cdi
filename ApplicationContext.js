@@ -1,13 +1,13 @@
 const _ = require('lodash');
 const Context = require('./context/Context');
 const Scopes = require('./context/Scopes');
-const LoggerFactory = require('@demo/log/LoggerFactory');
-const logger = LoggerFactory.getLogger('@demo/cdi/ApplicationContext');
+const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
+const logger = LoggerFactory.getLogger('@alt-javascript/contexts/ApplicationContext');
 
 module.exports = class ApplicationContext {
 
     constructor(contexts, profiles, name) {
-        this.logger = LoggerFactory.getLogger('@demo/cdi/ApplicationContext');
+        this.logger = LoggerFactory.getLogger('@alt-javascript/contexts/ApplicationContext');
         this.contexts = contexts;
         this.entries = {};
         this.profiles = profiles;

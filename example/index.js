@@ -1,7 +1,14 @@
+const {config} = require ("@alt-javascript/config");
+const {boot} = require ("@alt-javascript/boot");
+
+boot({config});
+
 const {ApplicationContext} = require('..');
 const {context} = require('./service');
-const LoggerFactory = require('@demo/log/LoggerFactory');
-const logger = LoggerFactory.getLogger('@demo/cdi/example');
+
+
+const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
+const logger = LoggerFactory.getLogger('@alt-javascript/contexts/example');
 
 logger.info('Starting application context');
 const applicationContext =  new ApplicationContext([context]);
