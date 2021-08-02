@@ -1,0 +1,23 @@
+{
+  "scanner" : {
+    "darkly" : {
+      "sdk-key" : "enc.<your secret Launch Darkly sdk key>"
+    }
+  },
+  "logging" : {
+    "format" : "text",
+    "^^^ set a format to json for JSON output" : "doco",
+    "level": {
+      "/" : "error",
+      "@alt-javascript/scanner-darkly" : "verbose",
+      "LaunchDarkly" : "debug",
+      "^^^ set a path level to enable log lines at that folder, down to file/module" : "doco"
+    },
+    "test" : {
+      "fixtures" : {
+        "quiet" : false,
+        "^^^ set quiet to false to see logs in unit tests" : "doco"
+      }
+    }
+  }
+}
