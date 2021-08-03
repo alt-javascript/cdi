@@ -1,10 +1,11 @@
 const { Autowired,Resource,Service,Scope,Profile,Qualifier,Value} = require('../../decorators');
+const { Scopes} = require('../../context');
 
 module.exports = class AutoService {
     static is = Service ('myService');
-    static with = [Scope(Scope.SINGLETON),Profile('test'),Qualifier('@cloud-pad-min/cdi/example/service/AutoService')]
+    static with = [Scope(Scopes.SINGLETON),Profile('test'),Qualifier('@cloud-pad-min/cdi/example/service/AutoService')]
     static qualifier = '@cloud-pad-min/cdi/example/service/AutoService';
-    static scope = Scope.SINGLETON;
+    static scope = Scopes.SINGLETON;
     static profile = Profile('asd,iuyiuy,jhjh',true);
 
     constructor() {

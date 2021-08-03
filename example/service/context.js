@@ -1,11 +1,11 @@
-const {Context,Component,Scope,Profile,Property} = require('../../context');
+const {Context,Component,Scopes,Profile,Property} = require('../../context');
 module.exports.context = new Context(
     [
         new Component(module.exports.AutoService),
         new Component(module.exports.ManualService,
             'manualService',
             '@alt-javascript/contexts/example/service/ManualService',
-            Scope.SINGLETON,
+            Scopes.SINGLETON,
             [
                 Property('logger', {factory:'LoggerFactory',method:'getLogger',args:['@alt-javascript/contexts/example/service/ManualService']}),
                 Property('autoService',{reference:'autoService'}),

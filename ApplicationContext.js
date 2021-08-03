@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const Context = require('./context/Context');
-const Scopes = require('./context/Scope');
+const Scopes = require('./context/Scopes');
 const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/ApplicationContext');
 
@@ -44,8 +44,8 @@ module.exports = class ApplicationContext {
 
     static parseContextComponents(logger, context, components, profiles, name) {
         logger.verbose('Processing context components started');
-        if (components){
-            if (_.isArray(components)){
+        if (context.components){
+            if (_.isArray(context.components)){
                 for (let component of context.components) {
                     ApplicationContext.parseContextComponent(logger, component, components, profiles);
                 }
@@ -87,14 +87,14 @@ module.exports = class ApplicationContext {
         if (component.isActive) {
             if (!components[component.name]) {
                 components[component.name] = component;
-                logger.verbose(`Added application context entry (${component.name}) with ${component.scope} scope`);
+                logger.verbose(`Added application context component (${component.name}) with ${component.scope} scope`);
             } else {
-                let msg = `Duplicate definition of application context entry (${component.name})`
+                let msg = `Duplicate definition of application context component (${component.name})`
                 logger.error(msg);
                 throw new Error(msg);
             }
         } else {
-            logger.verbose(`Skipped inactive application context entry (${component.name}), with scope ${component.scope}`);
+            logger.verbose(`Skipped inactive application context component (${component.name}), with scope ${component.scope}`);
         }
 
     }
@@ -102,15 +102,15 @@ module.exports = class ApplicationContext {
     static createSingletons(logger, components) {
         logger.verbose('Creating singletons started');
         for (let key in components){
-            let entry = components[key];
-            if (entry.scope === Scopes.SINGLETON){
-                if (entry.isClass){
-                    entry.instance = new entry.reference;
+            let component = components[key];
+            if (component.scope === Scopes.SINGLETON){
+                if (component.isClass){
+                    component.instance = new component.reference;
                 } else {
-                    entry.instance = entry.reference
+                    component.instance = component.reference
                 }
 
-                logger.verbose(`Created singleton (${entry.name})`);
+                logger.verbose(`Created singleton (${component.name})`);
             }
         }
         logger.verbose('Creating singletons completed');
@@ -119,13 +119,13 @@ module.exports = class ApplicationContext {
     static injectSingletonDependencies(logger, components) {
         logger.verbose('Injecting singletons dependencies started');
         for (let key in components){
-            let entry = components[key];
-            if (entry.scope == Scopes.SINGLETON){
-                for (let propKey in entry.instance) {
-                    let property = entry.instance[propKey];
+            let component = components[key];
+            if (component.scope == Scopes.SINGLETON){
+                for (let propKey in component.instance) {
+                    let property = component.instance[propKey];
                     let autowire = property?.name == 'Autowire'
                     if (autowire){
-                        entry.instance[propKey] = ApplicationContext.getEntry(logger,components,propKey);
+                        component.instance[propKey] = ApplicationContext.getEntry(logger,components,propKey);
                     }
                 }
             }
@@ -136,10 +136,10 @@ module.exports = class ApplicationContext {
 
     static getEntry (logger,components,reference){
         if (components[reference]){
-            logger.verbose(`Found entry (${reference})`);
+            logger.verbose(`Found component (${reference})`);
 
         }
-        let msg = `Failed entry reference lookup for (${reference})`;
+        let msg = `Failed component reference lookup for (${reference})`;
         logger.error(msg);
         throw new Error(msg);
     }
