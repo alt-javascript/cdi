@@ -1,6 +1,6 @@
 module.exports = class Component {
     constructor(reference,name,qualifier,scope,properties,profiles) {
-        this.reference = reference;
+        this.Reference = reference;
         this.isClass = false;
         this.name = name;
         this.qualifier = qualifier;

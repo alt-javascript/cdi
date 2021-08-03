@@ -27,8 +27,8 @@ module.exports = class ApplicationContext {
         this.parseContextComponents();
       } else if (_.isArray(this.contexts)) {
         logger.debug('Processing context list');
-        for (const context of this.contexts) {
-          this.parseContextComponents(context);
+        for (let i = 0; i < this.contexts.length; i++) {
+          this.parseContextComponents(this.contexts[i]);
         }
       }
     } else {
@@ -43,8 +43,8 @@ module.exports = class ApplicationContext {
     logger.verbose('Processing context components started');
     if (context.components) {
       if (_.isArray(context.components)) {
-        for (const component of context.components) {
-          this.parseContextComponent(component);
+        for (let i = 0; i < context.components.length; i++) {
+          this.parseContextComponent(context.components[i]);
         }
       } else {
 
@@ -58,13 +58,15 @@ module.exports = class ApplicationContext {
   }
 
   parseContextComponent(component) {
-    const constructr = component?.reference?.prototype?.constructor;
+    const constructr = component?.Reference?.prototype?.constructor;
     const $component = {};
     $component.isClass = constructr !== undefined;
 
     $component.name = component.name || _.lowerFirst(constructr.name);
     $component.qualifier = component.qualifier || _.lowerFirst(constructr.qualifier);
     $component.scope = component.scope || _.lowerFirst(constructr.scope);
+    $component.Reference = component.Reference;
+
     $component.profiles = component.profiles || constructr.profiles;
 
     $component.isActive = component.profiles === null;
@@ -97,13 +99,14 @@ module.exports = class ApplicationContext {
 
   createSingletons() {
     logger.verbose('Creating singletons started');
-    for (const key of Object.keys(this.components)) {
-      const component = this.components[key];
+    const keys = Object.keys(this.components);
+    for (let i = 0; i < keys.length; i++) {
+      const component = this.components[keys[i]];
       if (component.scope === Scopes.SINGLETON) {
         if (component.isClass) {
-          component.instance = new component.reference();
+          component.instance = new component.Reference();
         } else {
-          component.instance = component.reference;
+          component.instance = component.Reference;
         }
 
         logger.verbose(`Created singleton (${component.name})`);
@@ -114,14 +117,16 @@ module.exports = class ApplicationContext {
 
   injectSingletonDependencies() {
     logger.verbose('Injecting singletons dependencies started');
-    for (const key of Object.keys(this.components)) {
-      const component = this.components[key];
+    const keys = Object.keys(this.components);
+    for (let i = 0; i < keys.length; i++) {
+      const component = this.components[keys[i]];
       if (component.scope === Scopes.SINGLETON) {
-        for (const propKey of Object.keys(component.instance)) {
-          const property = component.instance[propKey];
+        const insKeys = Object.keys(component.instance);
+        for (let j = 0; j < insKeys.length; j++) {
+          const property = component.instance[insKeys[j]];
           const autowire = property?.name === 'Autowire';
           if (autowire) {
-            component.instance[propKey] = this.getEntry(propKey);
+            component.instance[insKeys[j]] = this.getEntry(insKeys[j]);
           }
         }
       }
