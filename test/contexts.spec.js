@@ -1,11 +1,14 @@
 const { assert } = require('chai');
-const {ApplicationContext} = require('../');
-const {context} = require('./service');
 const { LoggerFactory } = require('@alt-javascript/logger');
+const { Application, ApplicationContext } = require('..');
+const { context } = require('./service');
+
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/contexts_spec');
 
 logger.info('Starting application context');
-const applicationContext =  new ApplicationContext([context]);
+const applicationContext = new ApplicationContext([context]);
+Application.run(applicationContext);
+
 logger.info('Application context started');
 
 before(async () => {
@@ -36,5 +39,4 @@ describe('contexts Specification', () => {
   it('true is true', () => {
     assert.isTrue(true, 'true is true');
   });
-
 });
