@@ -3,7 +3,7 @@ const { Scopes} = require('../../context');
 
 module.exports = class AutoService {
     static is = Service ('myService');
-    static with = [Scope(Scopes.SINGLETON),Profile('test'),Qualifier('@cloud-pad-min/cdi/example/service/AutoService')]
+    static with = [Scope(Scopes.SINGLETON),Profile('test'),Qualifier('@alt-javascript/contexts/example/service/AutoService')]
     static qualifier = '@cloud-pad-min/cdi/example/service/AutoService';
     static scope = Scopes.SINGLETON;
     static profile = Profile('asd,iuyiuy,jhjh',true);

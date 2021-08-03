@@ -1,5 +1,5 @@
-const {ApplicationContext} = require('..');
-const {context} = require('service');
+const {ApplicationContext} = require('../../index');
+const {context} = require('test/service');
 
 module.exports = class SomeApplication {
     constructor() {

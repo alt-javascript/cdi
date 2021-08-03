@@ -3,8 +3,8 @@ const {boot} = require ("@alt-javascript/boot");
 
 boot({config});
 
-const {ApplicationContext} = require('..');
-const {context} = require('./service');
+const {ApplicationContext} = require('../../index');
+const {context} = require('../service');
 
 
 const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
