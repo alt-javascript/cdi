@@ -1,16 +1,10 @@
 {
-  "scanner" : {
-    "darkly" : {
-      "sdk-key" : "enc.<your secret Launch Darkly sdk key>"
-    }
-  },
   "logging" : {
     "format" : "text",
     "^^^ set a format to json for JSON output" : "doco",
     "level": {
       "/" : "verbose",
-      "@alt-javascript/scanner-darkly" : "verbose",
-      "LaunchDarkly" : "debug",
+      "@alt-javascript/contexts" : "verbose",
       "^^^ set a path level to enable log lines at that folder, down to file/module" : "doco"
     },
     "test" : {
@@ -19,5 +13,18 @@
         "^^^ set quiet to false to see logs in unit tests" : "doco"
       }
     }
+  },
+  "context" : {
+      "anotherManualService" : {
+        "qualifier" : "@alt-javascript/contexts/example/service/ManualService",
+        "scope": "singleton",
+        "properties" : [
+          {"name": "logger", "inject":  {"factory":"loggerFactory","method":"getLogger","args":["@alt-javascript/contexts/example/service/ManualService"]}},
+          {"name": "autoService", "inject": {"reference":"autoService"}},
+          {"name": "someProperty", "inject": "autoService" },
+          {"name": "someOtherComponent"}
+        ],
+        "profile " : ""
+      }
   }
 }

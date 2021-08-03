@@ -11,7 +11,7 @@ if (config.get('logging.test.fixtures.quiet',true)){
     boot({config:config});
 }
 
-const logger = LoggerFactory.getLogger('@alt-javascript/scanner-darkly/test/fixtures/index');
+const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/fixtures/index');
 
 exports.mochaGlobalSetup = async function setup() {
     logger.verbose('mocha global setup: started');

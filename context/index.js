@@ -1,7 +1,7 @@
 module.exports.Context = require('./Context');
-module.exports.Entry = require('./Entry');
+module.exports.Component = require('./Component');
 module.exports.Property = require('./Property');
-module.exports.Scopes = require('./Scopes');
+module.exports.Scope = require('./Scope');
 
 
 

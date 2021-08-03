@@ -1,4 +1,4 @@
-const Scopes = require('../context/Scopes');
+const Scopes = require('../context/Scope');
 
 const Scope = class Scope {
     static SINGLETON = Scopes.SINGLETON;

@@ -1,9 +1,8 @@
-const {Configure} = require('../..');
 module.exports = class ManualService {
     constructor() {
-        this.logger = Configure;
-        this.autoService = Configure;
-        this.someProperty = Configure;
-        this.someEntry = Configure;
+        this.logger = null;
+        this.autoService = null;
+        this.someProperty = null;
+        this.someEntry = null;
     }
 }

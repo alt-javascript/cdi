@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const Context = require('./context/Context');
-const Scopes = require('./context/Scopes');
+const Scopes = require('./context/Scope');
 const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/ApplicationContext');
 
@@ -9,29 +9,29 @@ module.exports = class ApplicationContext {
     constructor(contexts, profiles, name) {
         this.logger = LoggerFactory.getLogger('@alt-javascript/contexts/ApplicationContext');
         this.contexts = contexts;
-        this.entries = {};
+        this.components = {};
         this.profiles = profiles;
         this.name = name || 'default';
-        ApplicationContext.lifeCycle(this.logger, this.contexts, this.entries, this.profiles, this.name)
+        ApplicationContext.lifeCycle(this.logger, this.contexts, this.components, this.profiles, this.name)
     }
 
-    static lifeCycle(logger, contexts, entries, profiles, name) {
+    static lifeCycle(logger, contexts, components, profiles, name) {
         logger.verbose(`ApplicationContext (${name}) lifecycle started.`);
-        ApplicationContext.parseContexts(logger, contexts, entries, profiles);
-        ApplicationContext.createSingletons(logger, entries);
-        ApplicationContext.injectSingletonDependencies(logger, entries);
+        ApplicationContext.parseContexts(logger, contexts, components, profiles, name);
+        ApplicationContext.createSingletons(logger, components);
+        ApplicationContext.injectSingletonDependencies(logger, components);
         logger.verbose(`ApplicationContext (${name}) lifecycle completed.`);
     }
 
-    static parseContexts(logger, contexts, entries, profiles) {
+    static parseContexts(logger, contexts, components, profiles, name) {
         logger.verbose(`Parsing configured contexts started.`);
         if (contexts) {
             if (contexts?.constructor?.name == 'Context') {
-                ApplicationContext.parseContextEntries(logger, contexts, entries, profiles);
+                ApplicationContext.parseContextComponents(logger, contexts, components, profiles, name);
             } else if (_.isArray(contexts)) {
                 logger.debug('Processing context list');
                 for (let context of contexts) {
-                    ApplicationContext.parseContextEntries(logger, context, entries, profiles);
+                    ApplicationContext.parseContextComponents(logger, context, components, profiles, name);
                 }
             }
         } else {
@@ -42,56 +42,67 @@ module.exports = class ApplicationContext {
         logger.verbose(`Parsing configured contexts completed.`);
     }
 
-    static parseContextEntries(logger, context, entries, profiles) {
-        logger.verbose('Processing context entries started');
-        for (let entry of context.entries) {
-            ApplicationContext.parseContextEntry(logger, entry, entries, profiles);
+    static parseContextComponents(logger, context, components, profiles, name) {
+        logger.verbose('Processing context components started');
+        if (components){
+            if (_.isArray(components)){
+                for (let component of context.components) {
+                    ApplicationContext.parseContextComponent(logger, component, components, profiles);
+                }
+            } else {
+
+            }
+
+        } else {
+            const msg = `ApplicationContext (${name}) received a nullish context component.`;
+            logger.error(msg);
+            throw msg;
         }
-        logger.verbose('Processing context entries completed');
+        logger.verbose('Processing context components completed');
     }
 
-    static parseContextEntry(logger, entry, entries, profiles) {
-        let constructr = entry?.reference?.prototype?.constructor;
-        entry.isClass = constructr !== undefined;
+    static parseContextComponent(logger, component, components, profiles) {
+        let constructr = component?.reference?.prototype?.constructor;
+        component.isClass = constructr !== undefined;
 
-        entry.name = entry.name || _.lowerFirst(constructr.name);
-        entry.qualifier = entry.qualifier || _.lowerFirst(constructr.qualifier);
-        entry.scope = entry.scope || _.lowerFirst(constructr.scope);
-        entry.profiles = entry.profiles || constructr.profiles;
+        component.name = component.name || _.lowerFirst(constructr.name);
+        component.qualifier = component.qualifier || _.lowerFirst(constructr.qualifier);
+        component.scope = component.scope || _.lowerFirst(constructr.scope);
+        component.profiles = component.profiles || constructr.profiles;
 
-        entry.isActive = entry.profiles === null;
-        entry.isActive = entry.profiles === undefined;
-        entry.isActive = (_.isArray(entry.profiles)) && entry.profiles.length === 0;
-        entry.isActive = entry.profiles?.name !== undefined;
-        entry.isActive = entry.profiles?.name !== null;
+        component.isActive = component.profiles === null;
+        component.isActive = component.profiles === undefined;
+        component.isActive = (_.isArray(component.profiles)) && component.profiles.length === 0;
+        component.isActive = component.profiles?.name !== undefined;
+        component.isActive = component.profiles?.name !== null;
 
         let activeProfiles = profiles || '';
-        if (!entry.isActive) {
-            entry.isActive = activeProfiles.contains(entry.profiles?.name);
-            entry.isActive = _.isArray(entry.profiles) && _.findIndex(entry.profiles, (profile) => {
+        if (!component.isActive) {
+            component.isActive = activeProfiles.contains(component.profiles?.name);
+            component.isActive = _.isArray(component.profiles) && _.findIndex(component.profiles, (profile) => {
                 return activeProfiles.contains(profile.name)
             })
         }
 
-        if (entry.isActive) {
-            if (!entries[entry.name]) {
-                entries[entry.name] = entry;
-                logger.verbose(`Added application context entry (${entry.name}) with ${entry.scope} scope`);
+        if (component.isActive) {
+            if (!components[component.name]) {
+                components[component.name] = component;
+                logger.verbose(`Added application context entry (${component.name}) with ${component.scope} scope`);
             } else {
-                let msg = `Duplicate definition of application context entry (${entry.name})`
+                let msg = `Duplicate definition of application context entry (${component.name})`
                 logger.error(msg);
                 throw new Error(msg);
             }
         } else {
-            logger.verbose(`Skipped inactive application context entry (${entry.name}), with scope ${entry.scope}`);
+            logger.verbose(`Skipped inactive application context entry (${component.name}), with scope ${component.scope}`);
         }
 
     }
 
-    static createSingletons(logger, entries) {
+    static createSingletons(logger, components) {
         logger.verbose('Creating singletons started');
-        for (let key in entries){
-            let entry = entries[key];
+        for (let key in components){
+            let entry = components[key];
             if (entry.scope === Scopes.SINGLETON){
                 if (entry.isClass){
                     entry.instance = new entry.reference;
@@ -105,16 +116,16 @@ module.exports = class ApplicationContext {
         logger.verbose('Creating singletons completed');
     }
 
-    static injectSingletonDependencies(logger, entries) {
+    static injectSingletonDependencies(logger, components) {
         logger.verbose('Injecting singletons dependencies started');
-        for (let key in entries){
-            let entry = entries[key];
+        for (let key in components){
+            let entry = components[key];
             if (entry.scope == Scopes.SINGLETON){
                 for (let propKey in entry.instance) {
                     let property = entry.instance[propKey];
                     let autowire = property?.name == 'Autowire'
                     if (autowire){
-                        entry.instance[propKey] = ApplicationContext.getEntry(logger,entries,propKey);
+                        entry.instance[propKey] = ApplicationContext.getEntry(logger,components,propKey);
                     }
                 }
             }
@@ -123,8 +134,8 @@ module.exports = class ApplicationContext {
 
     }
 
-    static getEntry (logger,entries,reference){
-        if (entries[reference]){
+    static getEntry (logger,components,reference){
+        if (components[reference]){
             logger.verbose(`Found entry (${reference})`);
 
         }

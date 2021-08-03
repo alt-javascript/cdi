@@ -1,13 +1,13 @@
-const {Context,Entry, Scopes,Profile,Property} = require('../../context');
+const {Context,Component, Scope, Property} = require('../../context');
 module.exports.ManualService = require('./ManualService');
 module.exports.AutoService = require('./AutoService');
 module.exports.context = new Context(
     [
-        new Entry(module.exports.AutoService),
-        new Entry(module.exports.ManualService,
+        new Component(module.exports.AutoService),
+        new Component(module.exports.ManualService,
             'manualService',
             '@cloud-pad-min/cdi/example/service/ManualService',
-            Scopes.SINGLETON,
+            Scope.SINGLETON,
             [
                 Property('logger', {factory:'LoggerFactory',method:'getLogger',args:['@cloud-pad-min/cdi/example/service/AutoService']}),
                 Property('manualService',{reference:'manualService'}),

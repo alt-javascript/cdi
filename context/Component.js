@@ -1,4 +1,4 @@
-module.exports = class Entry {
+module.exports = class Component {
     constructor(reference,name,qualifier,scope,properties,profiles) {
         this.reference = reference;
         this.isClass = false;

@@ -1,19 +1,18 @@
-const {Context,Entry,Scope,Profile,Property} = require('../..');
+const {Context,Component,Scope,Profile,Property} = require('../../context');
 module.exports.context = new Context(
     [
-        new Entry(module.exports.AutoService),
-        new Entry(module.exports.ManualService,
+        new Component(module.exports.AutoService),
+        new Component(module.exports.ManualService,
             'manualService',
-            '@cloud-pad-min/cdi/example/service/AutoService',
-            [Scope.SINGLETON],
+            '@alt-javascript/contexts/example/service/ManualService',
+            Scope.SINGLETON,
             [
-                Property('logger', {factory:'LoggerFactory',method:'getLogger',args:['@cloud-pad-min/cdi/example/service/AutoService']}),
-                Property('manualService',{reference:'manualService'}),
-                Property('logger',{reference:'logger'}),
+                Property('logger', {factory:'LoggerFactory',method:'getLogger',args:['@alt-javascript/contexts/example/service/ManualService']}),
+                Property('autoService',{reference:'autoService'}),
                 Property('someProperty',{value:'myconfigpath',default:'myDefault'}),
                 Property('someEntry','someEntry'),
             ],
-            [Profile('some',true)])
+            Profile('some',true))
     ]
 );
 
