@@ -1,12 +1,12 @@
 const _ = require('lodash');
 const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
-const Scopes = require('./context/Scopes');
+const { Context, Component, Scopes } = require('./context');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/ApplicationContext');
 
 module.exports = class ApplicationContext {
   constructor(contexts, profiles, name) {
-    this.contexts = contexts;
+    this.contexts = _.isArray(contexts) ? contexts : [contexts];
     this.components = {};
     this.profiles = profiles;
     this.name = name || 'default';
@@ -22,19 +22,19 @@ module.exports = class ApplicationContext {
 
   parseContexts() {
     logger.verbose('Parsing configured contexts started.');
-    if (this.contexts) {
-      if (this.contexts?.constructor?.name === 'Context') {
-        this.parseContextComponents();
-      } else if (_.isArray(this.contexts)) {
-        logger.debug('Processing context list');
-        for (let i = 0; i < this.contexts.length; i++) {
+    logger.debug('Processing context list');
+    for (let i = 0; i < this.contexts.length; i++) {
+      if (this.contexts[i]) {
+        if (this.contexts[i]?.constructor?.name === 'Context') {
           this.parseContextComponents(this.contexts[i]);
+        } else {
+          this.parseContextComponents(new Context(this.contexts[i]));
         }
+      } else {
+        const msg = `ApplicationContext (${this.name}) received a nullish context.`;
+        logger.error(msg);
+        throw msg;
       }
-    } else {
-      const msg = `ApplicationContext (${this.name}) received a nullish context.`;
-      logger.error(msg);
-      throw msg;
     }
     logger.verbose('Parsing configured contexts completed.');
   }
@@ -47,7 +47,7 @@ module.exports = class ApplicationContext {
           this.parseContextComponent(context.components[i]);
         }
       } else {
-
+        this.parseContextComponent(context.components);
       }
     } else {
       const msg = `ApplicationContext (${this.name}) received a nullish context component.`;
@@ -57,17 +57,30 @@ module.exports = class ApplicationContext {
     logger.verbose('Processing context components completed');
   }
 
-  parseContextComponent(component) {
+  parseContextComponent(componentArg) {
+    let component = componentArg;
+    if (component?.constructor?.name !== 'Component'){
+      component =  new Component (
+          component, component.name,
+          component.qualifier,
+          component.scope,
+          component.properties,component.profiles);
+      component.require = componentArg.require;
+    }
     const constructr = component?.Reference?.prototype?.constructor;
     const $component = {};
     $component.isClass = constructr !== undefined;
 
-    $component.name = component.name || _.lowerFirst(constructr.name);
-    $component.qualifier = component.qualifier || _.lowerFirst(constructr.qualifier);
-    $component.scope = component.scope || _.lowerFirst(constructr.scope);
+    $component.name = _.lowerFirst(component.name) || _.lowerFirst(constructr.name);
+    $component.qualifier = component.qualifier || _.lowerFirst(constructr?.qualifier);
+    $component.scope = component.scope || _.lowerFirst(constructr?.scope) || Scopes.SINGLETON;
     $component.Reference = component.Reference;
+    if (component.require) {
+      $component.Reference = require(component.require);
+      $component.isClass = ($component?.Reference?.prototype?.constructor !== undefined);
+    }
 
-    $component.profiles = component.profiles || constructr.profiles;
+    $component.profiles = component.profiles || constructr?.profiles;
 
     $component.isActive = component.profiles === null;
     $component.isActive = component.profiles === undefined;
@@ -126,7 +139,7 @@ module.exports = class ApplicationContext {
           const property = component.instance[insKeys[j]];
           const autowire = property?.name === 'Autowire';
           if (autowire) {
-            component.instance[insKeys[j]] = this.getEntry(insKeys[j]);
+            component.instance[insKeys[j]] = this.get(insKeys[j]);
           }
         }
       }
@@ -134,9 +147,15 @@ module.exports = class ApplicationContext {
     logger.verbose('Injecting singleton dependencies completed');
   }
 
-  getEntry(reference) {
+  get(reference) {
     if (this.components[reference]) {
       logger.verbose(`Found component (${reference})`);
+      if (this.components[reference].scope === Scopes.SINGLETON) {
+        logger.verbose(`Component (${reference}) is scoped as (${Scopes.SINGLETON}), returning existing instance.`);
+        return this.components[reference].instance;
+      }
+      logger.verbose(`Component (${reference}) is scoped as (${Scopes.PROTOTYPE}), returning new instance.`);
+      return this.components[reference].instance;
     }
     const msg = `Failed component reference lookup for (${reference})`;
     logger.error(msg);

@@ -1,7 +1,6 @@
 module.exports = class Component {
     constructor(reference,name,qualifier,scope,properties,profiles) {
         this.Reference = reference;
-        this.isClass = false;
         this.name = name;
         this.qualifier = qualifier;
         this.scope = scope;
@@ -9,5 +8,8 @@ module.exports = class Component {
         this.profiles = profiles;
         this.isActive = true;
         this.instance = null;
+
+        this.isClass = false;
+        this.require = null;
     }
 }

@@ -18,12 +18,3 @@ module.exports.context = new Context(
       Profile('some', true)),
   ],
 );
-
-/*
-    constructor() {
-        this.logger = Autowire
-        this.manualService = Autowire;
-        this.someProperty = Value('myconfigpath');
-        this.someEntry = Reference('someEntry');
-    }
- */
