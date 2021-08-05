@@ -1,15 +1,21 @@
 const _ = require('lodash');
+const { Boot } = require('@alt-javascript/boot');
 const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
 const { Context, Component, Scopes } = require('./context');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/ApplicationContext');
 
 module.exports = class ApplicationContext {
+
+  static DEFAULT_CONTEXT_NAME = 'default';
+  static DEFAULT_CONFIG_CONTEXT_PATH = 'context';
   constructor(contexts, profiles, name) {
-    this.contexts = _.isArray(contexts) ? contexts : [contexts];
+    this.contexts = _.isArray(contexts) ? contexts: (contexts ? [contexts] : []);
     this.components = {};
     this.profiles = profiles;
-    this.name = name || 'default';
+    this.name = name || ApplicationContext.DEFAULT_CONTEXT_NAME;
+    this.configContextPath = process.env.NODE_CONFIG_CONTEXT_PATH || ApplicationContext.DEFAULT_CONFIG_CONTEXT_PATH;
+    this.config = Boot.root('config');
   }
 
   lifeCycle() {
@@ -20,9 +26,20 @@ module.exports = class ApplicationContext {
     logger.verbose(`ApplicationContext (${this.name}) lifecycle completed.`);
   }
 
+  detectConfigContext(){
+    logger.verbose('Detecting config contexts started.');
+    if (this.config){
+      if (this.config.has(this.configContextPath)){
+        logger.verbose(`Detected config context at ${this.configContextPath}, adding context.`);
+        this.contexts.push(this.config.get(this.configContextPath));
+      }
+    }
+    logger.verbose('Detecting config contexts completed.');
+  }
+
   parseContexts() {
     logger.verbose('Parsing configured contexts started.');
-    logger.debug('Processing context list');
+    this.detectConfigContext();
     for (let i = 0; i < this.contexts.length; i++) {
       if (this.contexts[i]) {
         if (this.contexts[i]?.constructor?.name === 'Context') {
@@ -44,10 +61,30 @@ module.exports = class ApplicationContext {
     if (context.components) {
       if (_.isArray(context.components)) {
         for (let i = 0; i < context.components.length; i++) {
-          this.parseContextComponent(context.components[i]);
+          if (context.components[i].name || context.components[i].Reference){
+            this.parseContextComponent(context.components[i]);
+          } else {
+            let contextKeys = Object.keys(context.components[i]);
+            for (let i = 0; i < contextKeys.length; i++) {
+              let name = contextKeys[i];
+              let component = context.components[i][name];
+              component.name = name;
+              this.parseContextComponent(component);
+            }
+          }
         }
       } else {
-        this.parseContextComponent(context.components);
+        if (context.components.name || context.components.Reference ){
+          this.parseContextComponent(context.components);
+        } else {
+          let contextKeys = Object.keys(context.components);
+          for (let i = 0; i < contextKeys.length; i++) {
+            let name = contextKeys[i];
+            let component = context.components[name];
+            component.name = name;
+            this.parseContextComponent(component);
+          }
+        }
       }
     } else {
       const msg = `ApplicationContext (${this.name}) received a nullish context component.`;

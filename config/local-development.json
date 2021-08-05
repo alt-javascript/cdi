@@ -13,18 +13,5 @@
         "^^^ set quiet to false to see logs in unit tests" : "doco"
       }
     }
-  },
-  "context" : {
-      "anotherManualService" : {
-        "qualifier" : "@alt-javascript/contexts/example/service/ManualService",
-        "scope": "singleton",
-        "properties" : [
-          {"name": "logger", "inject":  {"factory":"loggerFactory","method":"getLogger","args":["@alt-javascript/contexts/example/service/ManualService"]}},
-          {"name": "autoService", "inject": {"reference":"autoService"}},
-          {"name": "someProperty", "inject": "autoService" },
-          {"name": "someOtherComponent"}
-        ],
-        "profile " : ""
-      }
   }
 }

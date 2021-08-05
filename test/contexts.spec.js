@@ -5,9 +5,9 @@ const { context } = require('./service');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/contexts_spec');
 
-logger.info('Starting application context');
-const applicationContext = new ApplicationContext([context]);
-Application.run(applicationContext);
+// logger.info('Starting application context');
+// const applicationContext = new ApplicationContext([context]);
+// Application.run(applicationContext);
 
 logger.info('Application context started');
 
