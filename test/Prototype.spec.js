@@ -6,7 +6,7 @@ const SimpleClass = require('./service/SimpleClass');
 const { EphemeralConfig } = require('@alt-javascript/config');
 const { v4: uuidv4 } = require('uuid');
 
-const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Singleton_spec');
+const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Prototype_spec');
 
 before(async () => {
   logger.verbose('before spec setup started');
@@ -44,21 +44,11 @@ describe('Prototypes Specification', () => {
     assert.notEqual(simpleClass.uuid, simpleClass2.uuid, 'simpleClass.uuid !== simpleClass2.uuid');
   });
 
-  it('Simple Prototype is a prototype', () => {
+  it('Simple Prototype exists', () => {
     const context = new Context([new Prototype(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);
     Application.run(applicationContext);
-    const simpleClass = applicationContext.get('simpleClass');
-    assert.exists(simpleClass, 'simpleClass exists');
-  });
-
-  it('ApplicationContext accepts Context array with Prototype', () => {
-    const context = new Context([new Prototype(SimpleClass)]);
-
-    const applicationContext = new ApplicationContext([context]);
-    Application.run(applicationContext);
-
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
   });

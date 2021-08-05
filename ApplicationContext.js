@@ -168,9 +168,15 @@ module.exports = class ApplicationContext {
         const insKeys = Object.keys(component.instance);
         for (let j = 0; j < insKeys.length; j++) {
           const property = component.instance[insKeys[j]];
-          const autowire = property?.name === 'Autowire';
+          const autowire = property?.name === 'Autowired' || _.lowerCase(property) === 'autowired';
           if (autowire) {
             component.instance[insKeys[j]] = this.get(insKeys[j]);
+            logger.verbose(`Explicitly autowired component (${component.name}) property (${insKeys[j]}) from context.`);
+          } else if (component.instance[insKeys[j]] == null) {
+            component.instance[insKeys[j]] = this.get(insKeys[j], component.instance[insKeys[j]]);
+            if (component.instance[insKeys[j]] != null){
+              logger.verbose(`Implicitly autowired null component (${component.name}) property (${insKeys[j]}) from context.`);
+            }
           }
         }
       }
@@ -178,7 +184,7 @@ module.exports = class ApplicationContext {
     logger.verbose('Injecting singleton dependencies completed');
   }
 
-  get(reference) {
+  get(reference, defaultValue) {
     if (this.components[reference]) {
       logger.verbose(`Found component (${reference})`);
       if (this.components[reference].scope === Scopes.SINGLETON) {
@@ -193,8 +199,11 @@ module.exports = class ApplicationContext {
         return _.cloneDeep(this.components[reference]);
       }
     }
-    const msg = `Failed component reference lookup for (${reference})`;
-    logger.error(msg);
-    throw new Error(msg);
+    if (typeof defaultValue === 'undefined'){
+      const msg = `Failed component reference lookup for (${reference})`;
+      logger.error(msg);
+      throw new Error(msg);
+    }
+    return defaultValue;
   }
 };

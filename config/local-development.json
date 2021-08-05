@@ -3,8 +3,8 @@
     "format" : "text",
     "^^^ set a format to json for JSON output" : "doco",
     "level": {
-      "/" : "verbose",
-      "@alt-javascript/contexts" : "verbose",
+      "/" : "info",
+      "@alt-javascript/contexts" : "info",
       "^^^ set a path level to enable log lines at that folder, down to file/module" : "doco"
     },
     "test" : {
