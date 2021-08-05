@@ -159,7 +159,24 @@ module.exports = class ApplicationContext {
     logger.verbose('Creating singletons completed');
   }
 
-  autowireComponentDependencies (component){
+  autowireComponentDependencies (instance, component){
+    const insKeys = Object.keys(instance);
+    for (let j = 0; j < insKeys.length; j++) {
+      const property = instance[insKeys[j]];
+      const autowire = property?.name === 'Autowired' || _.lowerCase(property) === 'autowired';
+      if (autowire) {
+        instance[insKeys[j]] = this.get(insKeys[j]);
+        logger.verbose(`Explicitly autowired component (${component.name}) property (${insKeys[j]}) from context.`);
+      } else if (instance[insKeys[j]] == null) {
+        instance[insKeys[j]] = this.get(insKeys[j], instance[insKeys[j]]);
+        if (instance[insKeys[j]] != null){
+          logger.verbose(`Implicitly autowired null component (${component.name}) property (${insKeys[j]}) from context.`);
+        }
+      }
+    }
+  }
+
+  wireComponentDependencies (component){
     const insKeys = Object.keys(component.instance);
     for (let j = 0; j < insKeys.length; j++) {
       const property = component.instance[insKeys[j]];
@@ -182,7 +199,7 @@ module.exports = class ApplicationContext {
     for (let i = 0; i < keys.length; i++) {
       const component = this.components[keys[i]];
       if (component.scope === Scopes.SINGLETON) {
-        this.autowireComponentDependencies (component);
+        this.autowireComponentDependencies (component.instance,component);
       }
     }
     logger.verbose('Injecting singleton dependencies completed');
@@ -195,13 +212,16 @@ module.exports = class ApplicationContext {
         logger.verbose(`Component (${reference}) is scoped as (${Scopes.SINGLETON}), returning existing instance.`);
         return this.components[reference].instance;
       }
+      let prototype = null;
       if (this.components[reference].isClass) {
         logger.verbose(`Component (${reference}) is scoped as (${Scopes.PROTOTYPE}), returning new instance.`);
-        return  new this.components[reference].Reference();
+        prototype = new this.components[reference].Reference();
       } else {
         logger.verbose(`Component (${reference}) is scoped as (${Scopes.PROTOTYPE}), returning deep clone.`);
-        return _.cloneDeep(this.components[reference]);
+        prototype = _.cloneDeep(this.components[reference].Reference);
       }
+      this.autowireComponentDependencies (prototype,this.components[reference]);
+      return prototype;
     }
     if (typeof defaultValue === 'undefined'){
       const msg = `Failed component reference lookup for (${reference})`;
