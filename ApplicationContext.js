@@ -159,26 +159,30 @@ module.exports = class ApplicationContext {
     logger.verbose('Creating singletons completed');
   }
 
+  autowireComponentDependencies (component){
+    const insKeys = Object.keys(component.instance);
+    for (let j = 0; j < insKeys.length; j++) {
+      const property = component.instance[insKeys[j]];
+      const autowire = property?.name === 'Autowired' || _.lowerCase(property) === 'autowired';
+      if (autowire) {
+        component.instance[insKeys[j]] = this.get(insKeys[j]);
+        logger.verbose(`Explicitly autowired component (${component.name}) property (${insKeys[j]}) from context.`);
+      } else if (component.instance[insKeys[j]] == null) {
+        component.instance[insKeys[j]] = this.get(insKeys[j], component.instance[insKeys[j]]);
+        if (component.instance[insKeys[j]] != null){
+          logger.verbose(`Implicitly autowired null component (${component.name}) property (${insKeys[j]}) from context.`);
+        }
+      }
+    }
+  }
+
   injectSingletonDependencies() {
     logger.verbose('Injecting singletons dependencies started');
     const keys = Object.keys(this.components);
     for (let i = 0; i < keys.length; i++) {
       const component = this.components[keys[i]];
       if (component.scope === Scopes.SINGLETON) {
-        const insKeys = Object.keys(component.instance);
-        for (let j = 0; j < insKeys.length; j++) {
-          const property = component.instance[insKeys[j]];
-          const autowire = property?.name === 'Autowired' || _.lowerCase(property) === 'autowired';
-          if (autowire) {
-            component.instance[insKeys[j]] = this.get(insKeys[j]);
-            logger.verbose(`Explicitly autowired component (${component.name}) property (${insKeys[j]}) from context.`);
-          } else if (component.instance[insKeys[j]] == null) {
-            component.instance[insKeys[j]] = this.get(insKeys[j], component.instance[insKeys[j]]);
-            if (component.instance[insKeys[j]] != null){
-              logger.verbose(`Implicitly autowired null component (${component.name}) property (${insKeys[j]}) from context.`);
-            }
-          }
-        }
+        this.autowireComponentDependencies (component);
       }
     }
     logger.verbose('Injecting singleton dependencies completed');
