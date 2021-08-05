@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 
-module.exports = class SimpleSingleton {
+module.exports = class SimpleClass {
   constructor() {
-    this.uuid = uuidv4;
+    this.uuid = uuidv4();
   }
 };

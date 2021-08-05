@@ -56,35 +56,28 @@ module.exports = class ApplicationContext {
     logger.verbose('Parsing configured contexts completed.');
   }
 
+  deriveContextComponent(contextComponent) {
+    if (contextComponent.name || contextComponent.Reference){
+      this.parseContextComponent(contextComponent);
+    } else {
+      let contextKeys = Object.keys(contextComponent);
+      for (let i = 0; i < contextKeys.length; i++) {
+        let name = contextKeys[i];
+        let component = contextComponent[name];
+        component.name = name;
+        this.parseContextComponent(component);
+      }
+    }
+  }
   parseContextComponents(context) {
     logger.verbose('Processing context components started');
     if (context.components) {
       if (_.isArray(context.components)) {
         for (let i = 0; i < context.components.length; i++) {
-          if (context.components[i].name || context.components[i].Reference){
-            this.parseContextComponent(context.components[i]);
-          } else {
-            let contextKeys = Object.keys(context.components[i]);
-            for (let i = 0; i < contextKeys.length; i++) {
-              let name = contextKeys[i];
-              let component = context.components[i][name];
-              component.name = name;
-              this.parseContextComponent(component);
-            }
-          }
+          this.deriveContextComponent(context.components[i]);
         }
       } else {
-        if (context.components.name || context.components.Reference ){
-          this.parseContextComponent(context.components);
-        } else {
-          let contextKeys = Object.keys(context.components);
-          for (let i = 0; i < contextKeys.length; i++) {
-            let name = contextKeys[i];
-            let component = context.components[name];
-            component.name = name;
-            this.parseContextComponent(component);
-          }
-        }
+        this.deriveContextComponent(context.component);
       }
     } else {
       const msg = `ApplicationContext (${this.name}) received a nullish context component.`;
@@ -96,7 +89,9 @@ module.exports = class ApplicationContext {
 
   parseContextComponent(componentArg) {
     let component = componentArg;
-    if (component?.constructor?.name !== 'Component'){
+    if (component?.constructor?.name !== 'Component'
+        && component?.constructor?.name !== 'Singleton'
+        && component?.constructor?.name !== 'Prototype'){
       component =  new Component (
           component, component.name,
           component.qualifier,
@@ -158,7 +153,6 @@ module.exports = class ApplicationContext {
         } else {
           component.instance = component.Reference;
         }
-
         logger.verbose(`Created singleton (${component.name})`);
       }
     }
@@ -191,8 +185,13 @@ module.exports = class ApplicationContext {
         logger.verbose(`Component (${reference}) is scoped as (${Scopes.SINGLETON}), returning existing instance.`);
         return this.components[reference].instance;
       }
-      logger.verbose(`Component (${reference}) is scoped as (${Scopes.PROTOTYPE}), returning new instance.`);
-      return this.components[reference].instance;
+      if (this.components[reference].isClass) {
+        logger.verbose(`Component (${reference}) is scoped as (${Scopes.PROTOTYPE}), returning new instance.`);
+        return  new this.components[reference].Reference();
+      } else {
+        logger.verbose(`Component (${reference}) is scoped as (${Scopes.PROTOTYPE}), returning deep clone.`);
+        return _.cloneDeep(this.components[reference]);
+      }
     }
     const msg = `Failed component reference lookup for (${reference})`;
     logger.error(msg);

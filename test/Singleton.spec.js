@@ -1,8 +1,8 @@
 const { assert } = require('chai');
 const { LoggerFactory } = require('@alt-javascript/logger');
 const { Application, ApplicationContext } = require('..');
-const { Context, Component } = require('../context');
-const SimpleSingleton = require('./service/SimpleSingleton');
+const { Context, Component, Singleton } = require('../context');
+const SimpleClass = require('./service/SimpleClass');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Singleton_spec');
 
@@ -31,23 +31,23 @@ beforeEach(async () => {
 });
 
 describe('Singletons Specification', () => {
-  it('Simple Singleton is a singleton', () => {
-    const context = new Context([new Component(SimpleSingleton)]);
+  it('Simple Component is a singleton', () => {
+    const context = new Context([new Component(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);
     Application.run(applicationContext);
-    const simpleSingleton = applicationContext.get('simpleSingleton');
-    const simpleSingleton2 = applicationContext.get('simpleSingleton');
-    assert.exists(simpleSingleton, 'simpleSingleton exists');
-    assert.equal(simpleSingleton.uuid, simpleSingleton2.uuid, 'simpleSingleton.uuid === simpleSingleton2.uuid');
+    const simpleClass = applicationContext.get('simpleClass');
+    const simpleClass2 = applicationContext.get('simpleClass');
+    assert.exists(simpleClass, 'simpleClass exists');
+    assert.equal(simpleClass.uuid, simpleClass2.uuid, 'simpleClass.uuid === simpleClass2.uuid');
   });
 
   it('Simple Singleton is a singleton', () => {
-    const context = new Context([new Component(SimpleSingleton)]);
+    const context = new Context([new Singleton(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);
     Application.run(applicationContext);
-    const simpleSingleton = applicationContext.get('simpleSingleton');
-    assert.exists(simpleSingleton, 'simpleSingleton exists');
+    const simpleClass = applicationContext.get('simpleClass');
+    assert.exists(simpleClass, 'simpleClass exists');
   });
 });

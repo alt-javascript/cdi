@@ -1,12 +1,12 @@
 const { assert } = require('chai');
 const { LoggerFactory } = require('@alt-javascript/logger');
+const { Application, ApplicationContext } = require('..');
+const { Context, Prototype, Scopes } = require('../context');
+const SimpleClass = require('./service/SimpleClass');
 const { EphemeralConfig } = require('@alt-javascript/config');
 const { v4: uuidv4 } = require('uuid');
-const { Application, ApplicationContext } = require('..');
-const { Context, Component } = require('../context');
-const SimpleClass = require('./service/SimpleClass');
 
-const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/ApplicationContext_spec');
+const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Singleton_spec');
 
 before(async () => {
   logger.verbose('before spec setup started');
@@ -32,9 +32,29 @@ beforeEach(async () => {
   logger.verbose('before each setup completed');
 });
 
-describe('Singletons Specification', () => {
-  it('ApplicationContext accepts Context array', () => {
-    const context = new Context([new Component(SimpleClass)]);
+describe('Prototypes Specification', () => {
+  it('Simple Prototype is a prototype', () => {
+    const context = new Context([new Prototype(SimpleClass)]);
+
+    const applicationContext = new ApplicationContext([context]);
+    Application.run(applicationContext);
+    const simpleClass = applicationContext.get('simpleClass');
+    const simpleClass2 = applicationContext.get('simpleClass');
+    assert.exists(simpleClass, 'simpleClass exists');
+    assert.notEqual(simpleClass.uuid, simpleClass2.uuid, 'simpleClass.uuid !== simpleClass2.uuid');
+  });
+
+  it('Simple Prototype is a prototype', () => {
+    const context = new Context([new Prototype(SimpleClass)]);
+
+    const applicationContext = new ApplicationContext([context]);
+    Application.run(applicationContext);
+    const simpleClass = applicationContext.get('simpleClass');
+    assert.exists(simpleClass, 'simpleClass exists');
+  });
+
+  it('ApplicationContext accepts Context array with Prototype', () => {
+    const context = new Context([new Prototype(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);
     Application.run(applicationContext);
@@ -43,8 +63,8 @@ describe('Singletons Specification', () => {
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('ApplicationContext accepts Context object', () => {
-    const context = new Context(new Component(SimpleClass));
+  it('ApplicationContext accepts Context object with Prototype', () => {
+    const context = new Context(new Prototype(SimpleClass));
 
     const applicationContext = new ApplicationContext(context);
     Application.run(applicationContext);
@@ -53,8 +73,8 @@ describe('Singletons Specification', () => {
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('ApplicationContext accepts Component object', () => {
-    const context = new Component(SimpleClass);
+  it('ApplicationContext accepts Component object with Prototype', () => {
+    const context = new Prototype(SimpleClass);
 
     const applicationContext = new ApplicationContext(context);
     Application.run(applicationContext);
@@ -63,8 +83,8 @@ describe('Singletons Specification', () => {
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('ApplicationContext accepts plain old class', () => {
-    const context = SimpleClass;
+  it('ApplicationContext accepts plain old object with Prototype', () => {
+    const context = { name: 'SimpleClass', uuid: uuidv4(), scope: Scopes.PROTOTYPE };
 
     const applicationContext = new ApplicationContext(context);
     Application.run(applicationContext);
@@ -73,18 +93,8 @@ describe('Singletons Specification', () => {
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('ApplicationContext accepts plain old object', () => {
-    const context = { name: 'SimpleClass', uuid: uuidv4() };
-
-    const applicationContext = new ApplicationContext(context);
-    Application.run(applicationContext);
-
-    const simpleClass = applicationContext.get('simpleClass');
-    assert.exists(simpleClass, 'simpleClass exists');
-  });
-
-  it('ApplicationContext accepts plain old object, with require', () => {
-    const context = { name: 'SimpleClass', require: './test/service/SimpleClass' };
+  it('ApplicationContext accepts plain old object, with require with Prototype', () => {
+    const context = { name: 'SimpleClass', require: './test/service/SimpleClass', scope: Scopes.PROTOTYPE };
 
     const applicationContext = new ApplicationContext(context);
     Application.run(applicationContext);
@@ -94,15 +104,16 @@ describe('Singletons Specification', () => {
     assert.exists(simpleClass.uuid, 'simpleClass.uuid exists');
   });
 
-  it('ApplicationContext accepts config context', () => {
+  it('ApplicationContext accepts config context with Prototype', () => {
     const ephemeralConfig = new EphemeralConfig(
-      {
-        context: {
-          SimpleClass: {
-            require: './test/service/SimpleClass',
+        {
+          context: {
+            SimpleClass: {
+              require: './test/service/SimpleClass',
+             scope: Scopes.PROTOTYPE
+            },
           },
         },
-      },
     );
 
     const applicationContext = new ApplicationContext();
