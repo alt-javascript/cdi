@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { Boot } = require('@alt-javascript/boot');
 const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
-const { Context, Component, Scopes } = require('./context');
+const { Context, Component, Property, Scopes } = require('./context');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/ApplicationContext');
 
@@ -176,19 +176,46 @@ module.exports = class ApplicationContext {
     }
   }
 
-  wireComponentDependencies (component){
-    const insKeys = Object.keys(component.instance);
-    for (let j = 0; j < insKeys.length; j++) {
-      const property = component.instance[insKeys[j]];
-      const autowire = property?.name === 'Autowired' || _.lowerCase(property) === 'autowired';
-      if (autowire) {
-        component.instance[insKeys[j]] = this.get(insKeys[j]);
-        logger.verbose(`Explicitly autowired component (${component.name}) property (${insKeys[j]}) from context.`);
-      } else if (component.instance[insKeys[j]] == null) {
-        component.instance[insKeys[j]] = this.get(insKeys[j], component.instance[insKeys[j]]);
-        if (component.instance[insKeys[j]] != null){
-          logger.verbose(`Implicitly autowired null component (${component.name}) property (${insKeys[j]}) from context.`);
-        }
+  wireComponentProperty (component, propertyArg) {
+    let property = propertyArg;
+    if (component?.constructor?.name !== 'Property') {
+      property = Property();
+      property.name = component.properties[i].name;
+      property.reference = component.properties[i]?.reference;
+      property.value = component.properties[i]?.value;
+      property.path = component.properties[i]?.path;
+      property.defaultValue = component.properties[i]?.defaultValue;
+      property.factory = component.properties[i]?.factory;
+      property.function = component.properties[i]?.function;
+      property.args = component.properties[i]?.args;
+    }
+    if (typeof property.name === 'string') {
+      if (typeof property.reference) {
+        component.instance[property.name] = this.get(property.reference);
+        logger.verbose(`Explicitly wired component (${component.name}) property (${property.name}) with context reference (${property.reference}).`);
+      }
+      if (property.value) {
+        component.instance[property.name] = property.value;
+        logger.verbose(`Explicitly wired component (${component.name}) property (${property.name}) with value (${property.value}).`);
+      }
+      if (property.path) {
+        component.instance[property.name] = this.config.get(property.path, property.defaultValue);
+        logger.verbose(`Explicitly wired component (${component.name}) property (${property.name}) from config path (${property.path}).`);
+      }
+      if (property.factory && property.function) {
+        component.instance[property.name] = this.get(property.path)[property.method](property.args);
+        logger.verbose(`Explicitly wired component (${component.name}) property (${property.name}) from context factory function (${property.function}.${factory.function}).`);
+      }
+    }
+  }
+
+  wireComponentDependencies (component) {
+    if (component.properties) {
+      if (!Array.isArray(component.properties)) {
+        component.properties = [component.properties];
+      }
+      for (let i = 0; i < component.properties.length; i++) {
+        this.wireComponentProperty(component,component.properties[i]);
       }
     }
   }
@@ -200,6 +227,7 @@ module.exports = class ApplicationContext {
       const component = this.components[keys[i]];
       if (component.scope === Scopes.SINGLETON) {
         this.autowireComponentDependencies (component.instance,component);
+        this.wireComponentDependencies (component.instance,component);
       }
     }
     logger.verbose('Injecting singleton dependencies completed');
