@@ -8,6 +8,31 @@ module.exports = class ApplicationContext {
 
   static DEFAULT_CONTEXT_NAME = 'default';
   static DEFAULT_CONFIG_CONTEXT_PATH = 'context';
+
+  static getGlobalRef() {
+    let $globalref = null;
+    if (ApplicationContext.detectBrowser()) {
+      $globalref = window;
+    } else {
+      $globalref = global;
+    }
+    return $globalref;
+  }
+
+  static getGlobalRoot(key) {
+    const $globalref = ApplicationContext.getGlobalRef();
+    let $key = ($globalref && $globalref.boot);
+    $key = $key && $key.contexts;
+    $key = $key && $key.root;
+    $key = $key && $key[`${key}`];
+    return $key;
+  }
+
+  static detectBrowser() {
+    const browser = !(typeof window === 'undefined');
+    return browser;
+  }
+
   constructor(options) {
     let contexts = options?.contexts || options;
     this.contexts = _.isArray(contexts) ? contexts: (contexts ? [contexts] : []);
@@ -27,12 +52,14 @@ module.exports = class ApplicationContext {
     }
   }
 
-  lifeCycle() {
+  async lifeCycle() {
     logger.verbose(`ApplicationContext (${this.name}) lifecycle started.`);
-    this.parseContexts(this.contexts, this.components, this.profiles, this.name);
-    this.createSingletons(this.components);
-    this.injectSingletonDependencies(this.components);
-    logger.verbose(`ApplicationContext (${this.name}) lifecycle completed.`);
+    this.parseContexts();
+    this.createSingletons();
+    this.injectSingletonDependencies();
+    this.initialiseSingletons();
+    this.registerSingletonDestroyers();
+    this.run();
   }
 
   detectConfigContext(){
@@ -44,6 +71,39 @@ module.exports = class ApplicationContext {
       }
     }
     logger.verbose('Detecting config contexts completed.');
+  }
+
+  detectGlobalContextComponents(){
+    logger.verbose('Detecting global context components started.');
+
+    if (!this.components['config'] && ApplicationContext.getGlobalRoot('config')){
+      this.deriveContextComponent({
+        Reference:ApplicationContext.getGlobalRoot('config'),
+        name:'config'})
+    }
+    if (!this.components['loggerFactory'] && ApplicationContext.getGlobalRoot('loggerFactory')){
+      this.deriveContextComponent({
+        Reference:ApplicationContext.getGlobalRoot('loggerFactory'),
+        name:'loggerFactory'})
+    }
+    if (!this.components['loggerCategoryCache'] && ApplicationContext.getGlobalRoot('loggerCategoryCache')){
+      this.deriveContextComponent({
+        Reference:ApplicationContext.getGlobalRoot('loggerCategoryCache'),
+        name:'loggerCategoryCache'})
+    }
+    if (!this.components['logger']){
+      this.deriveContextComponent({
+        scope : Scopes.PROTOTYPE,
+        wireFactory:'loggerFactory',
+        name:'logger'})
+    }
+    if (!this.components['fetch'] && ApplicationContext.getGlobalRoot('fetch')){
+      this.deriveContextComponent({
+        Reference:ApplicationContext.getGlobalRoot('fetch'),
+        name:'fetch'})
+    }
+
+    logger.verbose('Detecting global context components completed.');
   }
 
   parseContexts() {
@@ -62,6 +122,7 @@ module.exports = class ApplicationContext {
         throw msg;
       }
     }
+    this.detectGlobalContextComponents();
     logger.verbose('Parsing configured contexts completed.');
   }
 
@@ -78,6 +139,7 @@ module.exports = class ApplicationContext {
       }
     }
   }
+
   parseContextComponents(context) {
     logger.verbose('Processing context components started');
     if (context.components) {
@@ -159,6 +221,12 @@ module.exports = class ApplicationContext {
       if (component.scope === Scopes.SINGLETON) {
         if (component.isClass) {
           component.instance = new component.Reference();
+        } else if (typeof component.factory === 'function') {
+          let args = component.factoryArgs;
+          if (!Array.isArray(args)) {
+            args = [args];
+          }
+          component.instance = new component.factory(...args);
         } else {
           component.instance = component.Reference;
         }
@@ -182,10 +250,10 @@ module.exports = class ApplicationContext {
       const property = instance[insKeys[j]];
       const autowire = property?.name === 'Autowired' || _.lowerCase(property) === 'autowired';
       if (autowire) {
-        instance[insKeys[j]] = this.get(insKeys[j]);
+        instance[insKeys[j]] = this.get(insKeys[j],undefined,component);
         logger.verbose(`Explicitly autowired component (${component.name}) property (${insKeys[j]}) from context.`);
       } else if (instance[insKeys[j]] == null) {
-        instance[insKeys[j]] = this.get(insKeys[j], instance[insKeys[j]]);
+        instance[insKeys[j]] = this.get(insKeys[j], instance[insKeys[j]], component);
         if (instance[insKeys[j]] != null){
           logger.verbose(`Implicitly autowired null component (${component.name}) property (${insKeys[j]}) from context.`);
         }
@@ -212,7 +280,7 @@ module.exports = class ApplicationContext {
     }
     if (typeof property.name === 'string') {
       if (typeof property.reference) {
-        component.instance[property.name] = this.get(property.reference);
+        component.instance[property.name] = this.get(property.reference, undefined, component);
         logger.verbose(`Explicitly wired component (${component.name}) property (${property.name}) with context reference (${property.reference}).`);
       }
       if (property.value) {
@@ -222,10 +290,6 @@ module.exports = class ApplicationContext {
       if (property.path) {
         component.instance[property.name] = this.config.get(property.path, property.defaultValue);
         logger.verbose(`Explicitly wired component (${component.name}) property (${property.name}) from config path (${property.path}).`);
-      }
-      if (property.factory && property.function) {
-        component.instance[property.name] = this.get(property.path)[property.method](property.args);
-        logger.verbose(`Explicitly wired component (${component.name}) property (${property.name}) from context factory function (${property.function}.${factory.function}).`);
       }
     }
   }
@@ -254,7 +318,71 @@ module.exports = class ApplicationContext {
     logger.verbose('Injecting singleton dependencies completed');
   }
 
-  get(reference, defaultValue) {
+  initialiseSingletons(){
+    logger.verbose('Initialising singletons started');
+    const keys = Object.keys(this.components);
+    for (let i = 0; i < keys.length; i++) {
+      const component = this.components[keys[i]];
+      if (component.scope === Scopes.SINGLETON) {
+        if (typeof component.instance.init === 'function') {
+          component.instance.init();
+        } else if (typeof component.init === 'string') {
+          component.instance[component.init]();
+        }
+        logger.verbose(`Initialised singleton (${component.name})`);
+      }
+    }
+    logger.verbose('Initialising singletons completed');
+  }
+
+  registerDestroyer(){
+    process.on('exit', destroyer.bind());
+    //catches ctrl+c event
+    process.on('SIGINT', destroyer.bind());
+    // catches "kill pid" (for example: nodemon restart)
+    process.on('SIGUSR1', destroyer.bind());
+    process.on('SIGUSR2', destroyer.bind());
+    //catches uncaught exceptions
+    process.on('uncaughtException', destroyer.bind());
+  }
+  async registerSingletonDestroyers(){
+    logger.verbose('Registering singleton destroyers started');
+    const keys = Object.keys(this.components);
+    for (let i = 0; i < keys.length; i++) {
+      const component = this.components[keys[i]];
+      if (component.scope === Scopes.SINGLETON) {
+        let destroyer = null;
+        if (typeof component.instance.destroy === 'function') {
+          destroyer = component.instance.destroy;
+        } else if (typeof component.destroy === 'string') {
+          destroyer = component.instance[component.destroy]();
+        }
+        this.registerDestroyer(destroyer);
+        this.registerDestroyer(() => {
+          logger.verbose(`ApplicationContext (${this.name}) lifecycle completed.`);
+        });
+
+        logger.verbose(`Registering singleton (${component.name}) destroyer`);
+      }
+    }
+
+    logger.verbose('Registering singleton destroyers completed');
+  }
+  async run (){
+    const keys = Object.keys(this.components);
+    for (let i = 0; i < keys.length; i++) {
+      const component = this.components[keys[i]];
+      if (component.scope === Scopes.SINGLETON) {
+        if (typeof component.instance.run === 'function') {
+          component.instance.run();
+        } else if (typeof component.run === 'string') {
+          component.instance[component.run]();
+        }
+      }
+    }
+    logger.verbose('Application context started');
+  }
+  get(reference, defaultValue, targetArgs) {
     if (this.components[reference]) {
       logger.verbose(`Found component (${reference})`);
       if (this.components[reference].scope === Scopes.SINGLETON) {
@@ -265,7 +393,38 @@ module.exports = class ApplicationContext {
       if (this.components[reference].isClass) {
         logger.verbose(`Component (${reference}) is scoped as (${Scopes.PROTOTYPE}), returning new instance.`);
         prototype = new this.components[reference].Reference();
-      } else {
+      } else if (typeof this.components[reference] === 'function') {
+        let args = targetArgs || this.components[reference].factoryArgs;
+        if (!Array.isArray(args)){
+          args = [args];
+        }
+        prototype = new this.components[reference](...args);
+      } else if (typeof this.components['factory'] === 'function') {
+        let args = this.components[reference].factoryArgs;
+        if (!Array.isArray(args)) {
+          args = [args];
+        }
+        prototype =  this.components[reference](...args);
+      } else if (typeof this.components['factory'] === 'string' && typeof this.components['factoryFunction'] === 'string') {
+        let args = this.components[reference]['factoryArgs'];
+        if (!Array.isArray(args)) {
+          args = [args];
+        }
+        prototype =  this.get(this.components['factory'])[this.components['factoryFunction']](...args);
+      } else if (typeof this.components['wireFactory'] === 'function') {
+        let args = targetArgs;
+        if (!Array.isArray(args)) {
+          args = [args];
+        }
+        prototype =  this.components['wireFactory'](...args);
+      } else if (typeof this.components['wireFactory'] === 'string') {
+        let args = targetArgs;
+        if (!Array.isArray(args)) {
+          args = [args];
+        }
+        prototype =  this.get(this.components['wireFactory'])(...args);
+      }
+      else {
         logger.verbose(`Component (${reference}) is scoped as (${Scopes.PROTOTYPE}), returning deep clone.`);
         prototype = _.cloneDeep(this.components[reference].Reference);
       }

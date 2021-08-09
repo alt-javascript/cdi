@@ -12,9 +12,6 @@ module.exports = class Application {
     if (applicationContext.constructor.name !== 'ApplicationContext') {
       applicationContext = new ApplicationContext(options);
     }
-    // if (!applicationContext?.config) {
-    //   applicationContext.config = options.config;
-    // }
     applicationContext.lifeCycle();
     return applicationContext;
   }
