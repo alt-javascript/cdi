@@ -36,8 +36,7 @@ describe('Singletons Specification', () => {
   it('ApplicationContext accepts Context array', () => {
     const context = new Context([new Component(SimpleClass)]);
 
-    const applicationContext = new ApplicationContext([context]);
-    Application.run(applicationContext);
+    const applicationContext = Application.run([context]);
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
@@ -46,8 +45,7 @@ describe('Singletons Specification', () => {
   it('ApplicationContext accepts Context object', () => {
     const context = new Context(new Component(SimpleClass));
 
-    const applicationContext = new ApplicationContext(context);
-    Application.run(applicationContext);
+    const applicationContext = Application.run(context);
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
@@ -56,8 +54,7 @@ describe('Singletons Specification', () => {
   it('ApplicationContext accepts Component object', () => {
     const context = new Component(SimpleClass);
 
-    const applicationContext = new ApplicationContext(context);
-    Application.run(applicationContext);
+    const applicationContext = Application.run(context);
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
@@ -66,8 +63,7 @@ describe('Singletons Specification', () => {
   it('ApplicationContext accepts plain old class', () => {
     const context = SimpleClass;
 
-    const applicationContext = new ApplicationContext(context);
-    Application.run(applicationContext);
+    const applicationContext = Application.run(context);
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
@@ -76,8 +72,7 @@ describe('Singletons Specification', () => {
   it('ApplicationContext accepts plain old object', () => {
     const context = { name: 'SimpleClass', uuid: uuidv4() };
 
-    const applicationContext = new ApplicationContext(context);
-    Application.run(applicationContext);
+    const applicationContext = Application.run(context);
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
@@ -86,8 +81,7 @@ describe('Singletons Specification', () => {
   it('ApplicationContext accepts plain old object, with require', () => {
     const context = { name: 'SimpleClass', require: './test/service/SimpleClass' };
 
-    const applicationContext = new ApplicationContext(context);
-    Application.run(applicationContext);
+    const applicationContext = Application.run(context);
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
@@ -105,9 +99,7 @@ describe('Singletons Specification', () => {
       },
     );
 
-    const applicationContext = new ApplicationContext();
-    applicationContext.config = ephemeralConfig;
-    Application.run(applicationContext);
+    const applicationContext = Application.run({ config: ephemeralConfig });
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');

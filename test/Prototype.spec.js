@@ -1,10 +1,10 @@
 const { assert } = require('chai');
 const { LoggerFactory } = require('@alt-javascript/logger');
+const { EphemeralConfig } = require('@alt-javascript/config');
+const { v4: uuidv4 } = require('uuid');
 const { Application, ApplicationContext } = require('..');
 const { Context, Prototype, Scopes } = require('../context');
 const SimpleClass = require('./service/SimpleClass');
-const { EphemeralConfig } = require('@alt-javascript/config');
-const { v4: uuidv4 } = require('uuid');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Prototype_spec');
 
@@ -96,14 +96,14 @@ describe('Prototypes Specification', () => {
 
   it('ApplicationContext accepts config context with Prototype', () => {
     const ephemeralConfig = new EphemeralConfig(
-        {
-          context: {
-            SimpleClass: {
-              require: './test/service/SimpleClass',
-             scope: Scopes.PROTOTYPE
-            },
+      {
+        context: {
+          SimpleClass: {
+            require: './test/service/SimpleClass',
+            scope: Scopes.PROTOTYPE,
           },
         },
+      },
     );
 
     const applicationContext = new ApplicationContext();

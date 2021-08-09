@@ -43,9 +43,8 @@ describe('Wiring Specification', () => {
     assert.exists(classB, 'classB exists');
     assert.equal(classA, classB.classA, 'classA === classB.classA');
     assert.equal(classB, classA.classB, 'classB === classA.classB');
-    assert.isNull(classA.attribute,'classA.attribute is null');
-    assert.isNull(classB.attribute,'classB.attribute is null');
-
+    assert.isNull(classA.attribute, 'classA.attribute is null');
+    assert.isNull(classB.attribute, 'classB.attribute is null');
   });
 
   // it('Simple Prototype is a prototype', () => {

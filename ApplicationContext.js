@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const { Boot } = require('@alt-javascript/boot');
 const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
 const { Context, Component, Property, Scopes } = require('./context');
 
@@ -9,13 +8,23 @@ module.exports = class ApplicationContext {
 
   static DEFAULT_CONTEXT_NAME = 'default';
   static DEFAULT_CONFIG_CONTEXT_PATH = 'context';
-  constructor(contexts, profiles, name) {
+  constructor(options) {
+    let contexts = options?.contexts || options;
     this.contexts = _.isArray(contexts) ? contexts: (contexts ? [contexts] : []);
     this.components = {};
-    this.profiles = profiles;
-    this.name = name || ApplicationContext.DEFAULT_CONTEXT_NAME;
-    this.configContextPath = process.env.NODE_CONFIG_CONTEXT_PATH || ApplicationContext.DEFAULT_CONFIG_CONTEXT_PATH;
-    this.config = Boot.root('config');
+    this.profiles = options?.profiles;
+    this.name = options?.name || ApplicationContext.DEFAULT_CONTEXT_NAME;
+    this.configContextPath = options?.configContextPath || process.env.NODE_CONFIG_CONTEXT_PATH || ApplicationContext.DEFAULT_CONFIG_CONTEXT_PATH;
+    this.config = options?.config;
+    if (options?.config){
+      delete options.config;
+    }
+    if (options?.profiles){
+      delete options.profiles;
+    }
+    if (options?.configContextPath){
+      delete options.configContextPath;
+    }
   }
 
   lifeCycle() {
@@ -159,6 +168,14 @@ module.exports = class ApplicationContext {
     logger.verbose('Creating singletons completed');
   }
 
+  resolveConfigPlaceHolder(placeholderArg){
+    let placeholder = placeholderArg.substr(2,placeholderArg.length-1);
+    let tuple = placeholder.split(':');
+    let path = tuple[0]
+    let defaultValue = tuple[1] || null;
+    return this.config.get(path,JSON.parse(defaultValue));
+  }
+
   autowireComponentDependencies (instance, component){
     const insKeys = Object.keys(instance);
     for (let j = 0; j < insKeys.length; j++) {
@@ -172,6 +189,8 @@ module.exports = class ApplicationContext {
         if (instance[insKeys[j]] != null){
           logger.verbose(`Implicitly autowired null component (${component.name}) property (${insKeys[j]}) from context.`);
         }
+      } else if (typeof instance[insKeys[j]] == 'string' && instance[insKeys[j]].startsWith('${')) {
+         instance[insKeys[j]] = this.resolveConfigPlaceHolder(instance[insKeys[j]]);
       }
     }
   }
