@@ -1,4 +1,4 @@
-TBD
+Application Contexts and Dependency Injection
 =============================================================
 
 [![NPM](https://nodei.co/npm/@alt-javascript/cdi.svg?downloads=true&downloadRank=true)](https://nodei.co/npm/@alt-javascript/cdi/)
@@ -9,9 +9,9 @@ TBD
 
 <a name="intro">Introduction</a>
 --------------------------------
-tbd
 
-<a name="usage">Usage</a>
--------------------------
+A familiar application context and dependency injection package, supporting simple
+singleton and prototype component factory definitions, with a choice of manual or auto
+wiring (injection) of property references and config placeholders.
 
-tbd
+
