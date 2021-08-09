@@ -169,7 +169,7 @@ module.exports = class ApplicationContext {
   }
 
   resolveConfigPlaceHolder(placeholderArg){
-    let placeholder = placeholderArg.substr(2,placeholderArg.length-1);
+    let placeholder = placeholderArg.substring(2,placeholderArg.length-1);
     let tuple = placeholder.split(':');
     let path = tuple[0]
     let defaultValue = tuple[1] || null;
@@ -191,6 +191,8 @@ module.exports = class ApplicationContext {
         }
       } else if (typeof instance[insKeys[j]] == 'string' && instance[insKeys[j]].startsWith('${')) {
          instance[insKeys[j]] = this.resolveConfigPlaceHolder(instance[insKeys[j]]);
+        logger.verbose(`Explicitly autowired placeholder component (${component.name}) property value (${insKeys[j]}) from config.`);
+
       }
     }
   }

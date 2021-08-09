@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const { EphemeralConfig } = require('@alt-javascript/config');
 const { LoggerFactory } = require('@alt-javascript/logger');
 const { Application, ApplicationContext } = require('..');
 const { Context, Component, Scopes } = require('../context');
@@ -45,6 +46,26 @@ describe('Wiring Specification', () => {
     assert.equal(classB, classA.classB, 'classB === classA.classB');
     assert.isNull(classA.attribute, 'classA.attribute is null');
     assert.isNull(classB.attribute, 'classB.attribute is null');
+  });
+
+  it('SimpleConfigProperty is autowired from config by default', () => {
+    const ephemeralConfig = new EphemeralConfig(
+      {
+        pathtovalue: 1,
+        context: {
+          SimpleConfigProperty: {
+            require: './test/service/SimpleConfigProperty',
+          },
+        },
+      },
+    );
+
+    const applicationContext = Application.run({ config: ephemeralConfig });
+
+    const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
+    assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
+    assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
+    assert.equal(simpleConfigProperty.attribute, 1, 'simpleClass.attribute == 1');
   });
 
   // it('Simple Prototype is a prototype', () => {
