@@ -1,23 +1,24 @@
 {
-  "name": "@alt-javascript/contexts",
+  "name": "@alt-javascript/cdi",
   "version": "1.0.0",
   "description": "",
   "author": "Craig Parravicini",
   "keywords": [
-    "logging",
-    "configuration",
-    "boostrap",
-    "boot",
-    "global",
-    "context"
+    "contexts",
+    "dependency",
+    "injection",
+    "cdi",
+    "spring",
+    "springframework",
+    "JSR 365"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "homepage": "https://github.com/alt-javascript/contexts#readme",
+  "homepage": "https://github.com/alt-javascript/cdi#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alt-javascript/contexts"
+    "url": "https://github.com/alt-javascript/cdi"
   },
   "main": "index.js",
   "scripts": {
