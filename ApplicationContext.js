@@ -187,6 +187,7 @@ module.exports = class ApplicationContext {
       $component.isClass = ($component?.Reference?.prototype?.constructor !== undefined);
     }
 
+    $component.properties = component.properties || constructr?.properties;
     $component.profiles = component.profiles || constructr?.profiles;
 
     $component.isActive = component.profiles === null;
@@ -271,16 +272,16 @@ module.exports = class ApplicationContext {
 
   wireComponentProperty (component, propertyArg) {
     let property = propertyArg;
-    if (component?.constructor?.name !== 'Property') {
+    if (propertyArg?.constructor?.name !== 'Property') {
       property = Property();
-      property.name = component.properties[i].name;
-      property.reference = component.properties[i]?.reference;
-      property.value = component.properties[i]?.value;
-      property.path = component.properties[i]?.path;
-      property.defaultValue = component.properties[i]?.defaultValue;
-      property.factory = component.properties[i]?.factory;
-      property.function = component.properties[i]?.function;
-      property.args = component.properties[i]?.args;
+      property.name = propertyArg.name;
+      property.reference = propertyArg?.reference;
+      property.value = propertyArg?.value;
+      property.path = propertyArg?.path;
+      property.defaultValue = propertyArg?.defaultValue;
+      property.factory = propertyArg?.factory;
+      property.function = propertyArg?.function;
+      property.args = propertyArg?.args;
     }
     if (typeof property.name === 'string') {
       if (typeof property.reference) {

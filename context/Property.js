@@ -7,4 +7,4 @@ const Property = class Property {
     }
 }
 
-module.exports = function (options){ new Property(options)};
+module.exports = Property;

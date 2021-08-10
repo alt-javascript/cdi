@@ -1,11 +1,12 @@
 module.exports = class Component {
-    constructor(reference,name,qualifier,scope,properties,profiles) {
-        this.Reference = reference;
-        this.name = name;
-        this.qualifier = qualifier;
-        this.scope = scope;
-        this.properties = properties;
-        this.profiles = profiles;
+    constructor(options) {
+        //reference,name,qualifier,scope,properties,profiles
+        this.Reference = options?.Reference || options;
+        this.name = options?.name;
+        this.qualifier = options?.qualifier;
+        this.scope = options?.scope;
+        this.properties = options?.properties;
+        this.profiles = options?.profiles;
         this.isActive = true;
         this.instance = null;
 

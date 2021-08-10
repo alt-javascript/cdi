@@ -2,9 +2,10 @@ const { assert } = require('chai');
 const { EphemeralConfig } = require('@alt-javascript/config');
 const { LoggerFactory } = require('@alt-javascript/logger');
 const { ApplicationContext } = require('..');
-const { Context, Component, Scopes } = require('../context');
+const { Context, Component, Property } = require('../context');
 const ClassA = require('./service/ClassA');
 const ClassB = require('./service/ClassB');
+const SimpleConfigProperty = require('./service/SimpleConfigProperty');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Singleton_spec');
 
@@ -69,6 +70,21 @@ describe('Wiring Specification', () => {
     assert.equal(simpleConfigProperty.attribute, 1, 'simpleClass.attribute == 1');
   });
 
+  it('SimpleConfigProperty is wired from context property definition', () => {
+    const context = new Context([new Component({
+      Reference:SimpleConfigProperty,
+      properties: [new Property ({name:'attribute', value: 1})]
+    })]);
+
+    const applicationContext = new ApplicationContext([context]);
+    applicationContext.start();
+
+    const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
+    assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
+    assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
+    assert.equal(simpleConfigProperty.attribute, 1, 'simpleClass.attribute == 1');
+
+  });
   // it('Simple Prototype is a prototype', () => {
   //   const context = new Context([new Prototype(SimpleClass)]);
   //
