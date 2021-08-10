@@ -1,6 +1,6 @@
 {
   "name": "@alt-javascript/cdi",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "author": "Craig Parravicini",
   "keywords": [
@@ -33,12 +33,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@alt-javascript/boot": "^1.0.10",
     "@alt-javascript/config": "^1.0.8",
     "@alt-javascript/logger": "^1.1.6",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@alt-javascript/boot": "^1.0.10",
     "@cucumber/cucumber": "^7.3.1",
     "babel-eslint": "^10.1.0",
     "chai": "^4.3.4",

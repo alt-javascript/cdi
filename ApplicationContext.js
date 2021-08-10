@@ -52,6 +52,10 @@ module.exports = class ApplicationContext {
     }
   }
 
+  async start() {
+    this.lifeCycle();
+  }
+
   async lifeCycle() {
     logger.verbose(`ApplicationContext (${this.name}) lifecycle started.`);
     this.parseContexts();
