@@ -36,7 +36,7 @@ module.exports = class ApplicationContext {
 
   constructor(options) {
     let contexts = options?.contexts || options;
-    this.contexts = _.isArray(contexts) ? contexts: (contexts ? [contexts] : []);
+    this.contexts = Array.isArray(contexts) ? contexts: (contexts ? [contexts] : []);
     this.components = {};
     this.profiles = options?.profiles;
     this.name = options?.name || ApplicationContext.DEFAULT_CONTEXT_NAME;
@@ -54,7 +54,7 @@ module.exports = class ApplicationContext {
   }
 
   async start() {
-    this.lifeCycle();
+      return this.lifeCycle();
   }
 
   async lifeCycle() {
@@ -64,7 +64,7 @@ module.exports = class ApplicationContext {
     this.injectSingletonDependencies();
     this.initialiseSingletons();
     this.registerSingletonDestroyers();
-    this.run();
+    return this.run();
   }
 
   detectConfigContext(){
@@ -148,7 +148,7 @@ module.exports = class ApplicationContext {
   parseContextComponents(context) {
     logger.verbose('Processing context components started');
     if (context.components) {
-      if (_.isArray(context.components)) {
+      if (Array.isArray(context.components)) {
         for (let i = 0; i < context.components.length; i++) {
           this.deriveContextComponent(context.components[i]);
         }
@@ -184,19 +184,23 @@ module.exports = class ApplicationContext {
 
     $component.properties = component.properties || constructr?.properties;
     $component.profiles = component.profiles || constructr?.profiles;
+    if (!$component.profiles){
+      $component.profiles = [];
+    }
+    if (typeof $component.profiles === 'string'){
+      $component.profiles = $component.profiles.split(',');
+    }
+    $component.isActive = $component.profiles.length === 0;
 
-    $component.isActive = component.profiles === null;
-    $component.isActive = component.profiles === undefined;
-    $component.isActive = (_.isArray(component.profiles)) && component.profiles.length === 0;
-    $component.isActive = component.profiles?.name !== undefined;
-    $component.isActive = component.profiles?.name !== null;
+    const activeProfiles = this.profiles?.split(',') || [];
+    if (activeProfiles.length > 0 && !$component.isActive) {
+      $component.isActive = _.intersection(activeProfiles,$component.profiles).length > 0;
+      if ($component.isActive === false){
+        let negations = _.filter($component.profiles,(profile) => profile.startsWith('!'));
+        negations = _.map(negations, (profile) => profile.substring(1));
+        $component.isActive = negations.length > 0 && _.intersection(activeProfiles,negations).length > 0;
+      }
 
-    const activeProfiles = this.profiles || '';
-    if (!$component.isActive) {
-      $component.isActive = activeProfiles.contains(component.profiles?.name);
-      $component.isActive = _.isArray(component.profiles)
-          && _.findIndex(component.profiles,
-            (profile) => activeProfiles.contains(profile.name));
     }
 
     if ($component.isActive) {
@@ -282,7 +286,7 @@ module.exports = class ApplicationContext {
   wireComponentProperty (component, propertyArg) {
     let property = propertyArg;
     if (propertyArg?.constructor?.name !== 'Property') {
-      property = Property();
+      property = new Property();
       property.name = propertyArg.name;
       property.reference = propertyArg?.reference;
       property.value = propertyArg?.value;

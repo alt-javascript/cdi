@@ -8,7 +8,7 @@ const ClassB = require('./service/ClassB');
 const ClassC = require('./service/ClassC');
 const SimpleConfigProperty = require('./service/SimpleConfigProperty');
 
-const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Singleton_spec');
+const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Wiring_spec');
 
 before(async () => {
   logger.verbose('before spec setup started');
@@ -76,10 +76,26 @@ describe('Wiring Specification', () => {
     assert.equal(simpleConfigProperty.attribute, 1, 'simpleClass.attribute == 1');
   });
 
-  it('SimpleConfigProperty is wired from context property definition', () => {
+  it('SimpleConfigProperty is wired from context Property definition', () => {
     const context = new Context([new Component({
       Reference:SimpleConfigProperty,
       properties: [new Property ({name:'attribute', value: 3})]
+    })]);
+
+    const applicationContext = new ApplicationContext([context]);
+    applicationContext.start();
+
+    const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
+    assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
+    assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
+    assert.equal(simpleConfigProperty.attribute, 3, 'simpleClass.attribute == 3');
+
+  });
+
+  it('SimpleConfigProperty is wired from context property object', () => {
+    const context = new Context([new Component({
+      Reference:SimpleConfigProperty,
+      properties: [ {name:'attribute', value: 3}]
     })]);
 
     const applicationContext = new ApplicationContext([context]);

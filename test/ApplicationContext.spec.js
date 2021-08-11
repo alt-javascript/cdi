@@ -1,4 +1,5 @@
-const { assert } = require('chai');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const { LoggerFactory } = require('@alt-javascript/logger');
 const { EphemeralConfig } = require('@alt-javascript/config');
 const { v4: uuidv4 } = require('uuid');
@@ -7,6 +8,9 @@ const { Context, Component } = require('../context');
 const SimpleClass = require('./service/SimpleClass');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/ApplicationContext_spec');
+const assert = chai.assert;
+chai.use(chaiAsPromised);
+
 
 before(async () => {
   logger.verbose('before spec setup started');
@@ -32,33 +36,32 @@ beforeEach(async () => {
   logger.verbose('before each setup completed');
 });
 
-describe('Singletons Specification', () => {
-  it('ApplicationContext accepts nullish', () => {
+describe('ApplicationContext Specification', () => {
+  it('ApplicationContext accepts nullish', async () => {
     const context = new Context();
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await applicationContext.start();
 
     const config = applicationContext.get('config');
     assert.exists(config, 'config exists');
   });
 
-  it('ApplicationContext throws nullish', () => {
+  it('ApplicationContext throws nullish', async () => {
 
     const applicationContext = new ApplicationContext([null]);
-    applicationContext.start();
-  });
+    await assert.isRejected(applicationContext.start(), Error, "ApplicationContext (default) received a nullish context.");  });
 
-  it('ApplicationContext throws nullish', () => {
+  it('ApplicationContext accepts nullish components', async () => {
 
     const applicationContext = new ApplicationContext([new Context(null)]);
-    applicationContext.start();
+    await assert.isFulfilled(applicationContext.start(), "new ApplicationContext([new Context(null)] is ok");
   });
-  it('ApplicationContext fails on dupe', () => {
+  it('ApplicationContext fails on dupe', async () => {
     const context = new Context([new Component(SimpleClass),new Component(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await assert.isRejected(applicationContext.start(), Error, "Duplicate definition of application context component (simpleClass)");
   });
 
   it('ApplicationContext accepts Context array', () => {
