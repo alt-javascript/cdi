@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
 const { Context, Component, Property, Scopes } = require('./context');
+const { EphemeralConfig, ConfigFactory } = require('@alt-javascript/config');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/ApplicationContext');
 
@@ -40,7 +41,7 @@ module.exports = class ApplicationContext {
     this.profiles = options?.profiles;
     this.name = options?.name || ApplicationContext.DEFAULT_CONTEXT_NAME;
     this.configContextPath = options?.configContextPath || process.env.NODE_CONFIG_CONTEXT_PATH || ApplicationContext.DEFAULT_CONFIG_CONTEXT_PATH;
-    this.config = options?.config;
+    this.config = options?.config || ConfigFactory.getConfig(new EphemeralConfig({}));
     if (options?.config){
       delete options.config;
     }
@@ -123,7 +124,7 @@ module.exports = class ApplicationContext {
       } else {
         const msg = `ApplicationContext (${this.name}) received a nullish context.`;
         logger.error(msg);
-        throw msg;
+        throw new Error(msg);
       }
     }
     this.detectGlobalContextComponents();
@@ -151,13 +152,7 @@ module.exports = class ApplicationContext {
         for (let i = 0; i < context.components.length; i++) {
           this.deriveContextComponent(context.components[i]);
         }
-      } else {
-        this.deriveContextComponent(context.component);
       }
-    } else {
-      const msg = `ApplicationContext (${this.name}) received a nullish context component.`;
-      logger.error(msg);
-      throw msg;
     }
     logger.verbose('Processing context components completed');
   }
@@ -246,7 +241,15 @@ module.exports = class ApplicationContext {
     let tuple = placeholder.split(':');
     let path = tuple[0]
     let defaultValue = tuple[1] || null;
-    return this.config.get(path,JSON.parse(defaultValue));
+    let returnValue = null;
+    try {
+      returnValue = this.config.get(path,JSON.parse(defaultValue));
+    } catch (e){
+      let msg = `Failed to resolve placeholder component property value (${path}) from config.`
+      logger.error(msg);
+      throw new Error (msg);
+    }
+    return returnValue
   }
 
   autowireComponentDependencies (instance, component){
@@ -258,12 +261,18 @@ module.exports = class ApplicationContext {
         instance[insKeys[j]] = this.get(insKeys[j],undefined,component);
         logger.verbose(`Explicitly autowired component (${component.name}) property (${insKeys[j]}) from context.`);
       } else if (instance[insKeys[j]] == null) {
-        instance[insKeys[j]] = this.get(insKeys[j], instance[insKeys[j]], component);
+        instance[insKeys[j]] = this.get(insKeys[j], (instance[insKeys[j]] || null), component);
         if (instance[insKeys[j]] != null){
           logger.verbose(`Implicitly autowired null component (${component.name}) property (${insKeys[j]}) from context.`);
         }
       } else if (typeof instance[insKeys[j]] == 'string' && instance[insKeys[j]].startsWith('${')) {
-         instance[insKeys[j]] = this.resolveConfigPlaceHolder(instance[insKeys[j]]);
+        try {
+          instance[insKeys[j]] = this.resolveConfigPlaceHolder(instance[insKeys[j]]);
+        } catch (e){
+          let msg = `Failed to explicitly autowired placeholder component (${component.name}) property value (${insKeys[j]}) from config.`
+          logger.error(msg);
+          throw new Error (msg);
+        }
         logger.verbose(`Explicitly autowired placeholder component (${component.name}) property value (${insKeys[j]}) from config.`);
 
       }
@@ -284,7 +293,7 @@ module.exports = class ApplicationContext {
       property.args = propertyArg?.args;
     }
     if (typeof property.name === 'string') {
-      if (typeof property.reference) {
+      if (property.reference) {
         component.instance[property.name] = this.get(property.reference, undefined, component);
         logger.verbose(`Explicitly wired component (${component.name}) property (${property.name}) with context reference (${property.reference}).`);
       }
@@ -317,7 +326,7 @@ module.exports = class ApplicationContext {
       const component = this.components[keys[i]];
       if (component.scope === Scopes.SINGLETON) {
         this.autowireComponentDependencies (component.instance,component);
-        this.wireComponentDependencies (component.instance,component);
+        this.wireComponentDependencies (component);
       }
     }
     logger.verbose('Injecting singleton dependencies completed');

@@ -50,4 +50,12 @@ describe('Singletons Specification', () => {
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
   });
+  it('Simple Singleton is a singleton using Reference', () => {
+    const context = new Context([new Singleton({Reference: SimpleClass})]);
+
+    const applicationContext = new ApplicationContext([context]);
+    applicationContext.start();
+    const simpleClass = applicationContext.get('simpleClass');
+    assert.exists(simpleClass, 'simpleClass exists');
+  });
 });

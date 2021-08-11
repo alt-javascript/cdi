@@ -33,6 +33,34 @@ beforeEach(async () => {
 });
 
 describe('Singletons Specification', () => {
+  it('ApplicationContext accepts nullish', () => {
+    const context = new Context();
+
+    const applicationContext = new ApplicationContext([context]);
+    applicationContext.start();
+
+    const config = applicationContext.get('config');
+    assert.exists(config, 'config exists');
+  });
+
+  it('ApplicationContext throws nullish', () => {
+
+    const applicationContext = new ApplicationContext([null]);
+    applicationContext.start();
+  });
+
+  it('ApplicationContext throws nullish', () => {
+
+    const applicationContext = new ApplicationContext([new Context(null)]);
+    applicationContext.start();
+  });
+  it('ApplicationContext fails on dupe', () => {
+    const context = new Context([new Component(SimpleClass),new Component(SimpleClass)]);
+
+    const applicationContext = new ApplicationContext([context]);
+    applicationContext.start();
+  });
+
   it('ApplicationContext accepts Context array', () => {
     const context = new Context([new Component(SimpleClass)]);
 

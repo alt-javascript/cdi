@@ -4,7 +4,7 @@
     "^^^ set a format to json for JSON output" : "doco",
     "level": {
       "/" : "info",
-      "@alt-javascript/contexts" : "info",
+      "@alt-javascript/contexts" : "verbose",
       "^^^ set a path level to enable log lines at that folder, down to file/module" : "doco"
     },
     "test" : {

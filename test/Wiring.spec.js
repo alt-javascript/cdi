@@ -5,6 +5,7 @@ const { ApplicationContext } = require('..');
 const { Context, Component, Property } = require('../context');
 const ClassA = require('./service/ClassA');
 const ClassB = require('./service/ClassB');
+const ClassC = require('./service/ClassC');
 const SimpleConfigProperty = require('./service/SimpleConfigProperty');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Singleton_spec');
@@ -35,19 +36,24 @@ beforeEach(async () => {
 
 describe('Wiring Specification', () => {
   it('Classes A & B exist and are autowired by default', () => {
-    const context = new Context([new Component(ClassA), new Component(ClassB)]);
+    const context = new Context([new Component(ClassA), new Component(ClassB),new Component(ClassC)]);
 
     const applicationContext = new ApplicationContext([context]);
     applicationContext.start();
     const classA = applicationContext.get('classA');
     const classB = applicationContext.get('classB');
+    const classC = applicationContext.get('classC');
     assert.exists(classA, 'classA exists');
     assert.exists(classB, 'classB exists');
     assert.equal(classA, classB.classA, 'classA === classB.classA');
     assert.equal(classB, classA.classB, 'classB === classA.classB');
+    assert.equal(classB, classC.classB, 'classB === classC.classB');
     assert.isNull(classA.attribute, 'classA.attribute is null');
     assert.isNull(classB.attribute, 'classB.attribute is null');
+    assert.isNull(classC.attribute, 'classC.attribute is null');
   });
+
+
 
   it('SimpleConfigProperty is autowired from config by default', () => {
     const ephemeralConfig = new EphemeralConfig(
@@ -73,7 +79,7 @@ describe('Wiring Specification', () => {
   it('SimpleConfigProperty is wired from context property definition', () => {
     const context = new Context([new Component({
       Reference:SimpleConfigProperty,
-      properties: [new Property ({name:'attribute', value: 1})]
+      properties: [new Property ({name:'attribute', value: 3})]
     })]);
 
     const applicationContext = new ApplicationContext([context]);
@@ -82,7 +88,7 @@ describe('Wiring Specification', () => {
     const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
     assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
     assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
-    assert.equal(simpleConfigProperty.attribute, 1, 'simpleClass.attribute == 1');
+    assert.equal(simpleConfigProperty.attribute, 3, 'simpleClass.attribute == 3');
 
   });
   // it('Simple Prototype is a prototype', () => {

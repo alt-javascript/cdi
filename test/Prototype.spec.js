@@ -75,6 +75,16 @@ describe('Prototypes Specification', () => {
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
+  it('ApplicationContext accepts Component object with Prototype with Reference', () => {
+    const context = new Prototype({Reference: SimpleClass});
+
+    const applicationContext = new ApplicationContext(context);
+    applicationContext.start();
+
+    const simpleClass = applicationContext.get('simpleClass');
+    assert.exists(simpleClass, 'simpleClass exists');
+  });
+
   it('ApplicationContext accepts plain old object with Prototype', () => {
     const context = { name: 'SimpleClass', uuid: uuidv4(), scope: Scopes.PROTOTYPE };
 
