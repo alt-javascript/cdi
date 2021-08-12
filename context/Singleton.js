@@ -3,8 +3,10 @@ const Scopes = require('./Scopes');
 
 module.exports = class Singleton extends Component {
     constructor(optionsArg) {
-        let options = optionsArg.Reference ? optionsArg : {Reference: optionsArg}
-        options.scope = Scopes.PROTOTYPE;
+        let options = (optionsArg?.Reference
+            || optionsArg.factory
+            || optionsArg.wireFactory) ? optionsArg : {Reference: optionsArg};
+        options.scope = Scopes.SINGLETON;
         super (options);
     }
 }

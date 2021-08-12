@@ -65,7 +65,7 @@ describe('Profile Specification', () => {
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('Component with profile is not active when different active profiles set',  () => {
+  it('Component with profile is not active when different active profiles set',  async () => {
     const context = { name: 'SimpleClass', attr: 'value', profiles: 'default' };
 
     const applicationContext = new ApplicationContext({contexts:context,profiles:'other'});
@@ -73,12 +73,13 @@ describe('Profile Specification', () => {
 
     assert.throws(() => {applicationContext.get('simpleClass');}, Error,'Failed component reference lookup for (simpleClass)');
   });
-  it('Component with profile negation is active when different active profiles set',  () => {
+  it('Component with profile negation is active when different active profiles set', async () => {
     const context = { name: 'SimpleClass', attr: 'value', profiles: '!default' };
 
     const applicationContext = new ApplicationContext({contexts:context,profiles:'other'});
+    await applicationContext.start();
     const simpleClass = applicationContext.get('simpleClass');
-    applicationContext.start();
+
 
     assert.exists(simpleClass, 'simpleClass exists');
   });

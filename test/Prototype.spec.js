@@ -6,7 +6,7 @@ const { ApplicationContext } = require('..');
 const { Context, Prototype, Scopes } = require('../context');
 const SimpleClass = require('./service/SimpleClass');
 
-const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Prototype_spec');
+const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/Prototype_spec');
 
 before(async () => {
   logger.verbose('before spec setup started');
@@ -126,4 +126,63 @@ describe('Prototypes Specification', () => {
     assert.exists(simpleClass, 'simpleClass exists');
     assert.exists(simpleClass.uuid, 'simpleClass.uuid exists');
   });
+
+
+  it('Simple Prototype using Reference function', () => {
+    const context = new Context([new Prototype({name:'funcy', Reference: () => {
+        return {attr:'value'}
+      }})]);
+
+    const applicationContext = new ApplicationContext([context]);
+    applicationContext.start();
+    const funcy = applicationContext.get('funcy');
+    assert.exists(funcy, 'funcy exists');
+    assert.equal(funcy.attr,'value', 'funcy.attr == value');
+  });
+
+  it('Simple Prototype using factory function', () => {
+    const context = new Context([new Prototype({name:'funcy', factory: () => {
+        return {attr:'value'}
+      }, factoryArgs:'one'})]);
+
+    const applicationContext = new ApplicationContext([context]);
+    applicationContext.start();
+    const funcy = applicationContext.get('funcy');
+    assert.exists(funcy, 'funcy exists');
+    assert.equal(funcy.attr,'value', 'funcy.attr == value');
+  });
+
+  it('Simple Prototype using singleton factory function', () => {
+    const context = new Context([
+        {name: 'singletonFactory',
+         generator: (param) => {
+          return { name:'simplePrototype', attr:param};
+        }
+        },
+        new Prototype({
+          name:'factoryProto', factory: 'singletonFactory',
+          factoryFunction: 'generator',factoryArgs:'one'})]);
+
+    const applicationContext = new ApplicationContext([context]);
+    applicationContext.start();
+    const factoryProto = applicationContext.get('factoryProto');
+    assert.exists(factoryProto, 'factoryProto exists');
+    assert.equal(factoryProto.attr,'one', 'funcy.attr == one');
+  });
+
+  it('Simple Singleton wires logger prototype with wireFactory', () => {
+    const context = new Context(
+      { name:'simpleSingleton',
+        qualifier:"@alt-javascript/cdi/SimpleSingleton",
+        logger:null}
+    );
+
+    const applicationContext = new ApplicationContext([context]);
+    applicationContext.start();
+    const simpleSingleton = applicationContext.get('simpleSingleton');
+    assert.exists(simpleSingleton, 'simpleSingleton exists');
+    assert.exists(simpleSingleton.logger, 'simpleSingleton.logger exists');
+    assert.equal(simpleSingleton.logger.category,simpleSingleton.qualifier, 'simpleSingleton.logger.category == simpleSingleton.qualifier');
+  });
+
 });

@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 const { LoggerFactory } = require('@alt-javascript/logger');
 const { ApplicationContext } = require('..');
-const { Context, Component, Singleton } = require('../context');
+const { Context, Component, Singleton, Prototype } = require('../context');
 const SimpleClass = require('./service/SimpleClass');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Singleton_spec');
@@ -30,7 +30,7 @@ beforeEach(async () => {
   logger.verbose('before each setup completed');
 });
 
-describe('Singletons Specification', () => {
+describe('Singleton Specification', () => {
   it('Simple Component is a singleton', () => {
     const context = new Context([new Component(SimpleClass)]);
 
@@ -58,4 +58,5 @@ describe('Singletons Specification', () => {
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
   });
+
 });

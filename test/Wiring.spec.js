@@ -1,4 +1,5 @@
-const { assert } = require('chai');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const { EphemeralConfig } = require('@alt-javascript/config');
 const { LoggerFactory } = require('@alt-javascript/logger');
 const { ApplicationContext } = require('..');
@@ -9,6 +10,8 @@ const ClassC = require('./service/ClassC');
 const SimpleConfigProperty = require('./service/SimpleConfigProperty');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Wiring_spec');
+const assert = chai.assert;
+chai.use(chaiAsPromised);
 
 before(async () => {
   logger.verbose('before spec setup started');
@@ -107,84 +110,13 @@ describe('Wiring Specification', () => {
     assert.equal(simpleConfigProperty.attribute, 3, 'simpleClass.attribute == 3');
 
   });
-  // it('Simple Prototype is a prototype', () => {
-  //   const context = new Context([new Prototype(SimpleClass)]);
-  //
-  //   const applicationContext = new ApplicationContext([context]);
-  //   Application.run(applicationContext);
-  //   const simpleClass = applicationContext.get('simpleClass');
-  //   assert.exists(simpleClass, 'simpleClass exists');
-  // });
-  //
-  // it('ApplicationContext accepts Context array with Prototype', () => {
-  //   const context = new Context([new Prototype(SimpleClass)]);
-  //
-  //   const applicationContext = new ApplicationContext([context]);
-  //   Application.run(applicationContext);
-  //
-  //   const simpleClass = applicationContext.get('simpleClass');
-  //   assert.exists(simpleClass, 'simpleClass exists');
-  // });
-  //
-  // it('ApplicationContext accepts Context object with Prototype', () => {
-  //   const context = new Context(new Prototype(SimpleClass));
-  //
-  //   const applicationContext = new ApplicationContext(context);
-  //   Application.run(applicationContext);
-  //
-  //   const simpleClass = applicationContext.get('simpleClass');
-  //   assert.exists(simpleClass, 'simpleClass exists');
-  // });
-  //
-  // it('ApplicationContext accepts Component object with Prototype', () => {
-  //   const context = new Prototype(SimpleClass);
-  //
-  //   const applicationContext = new ApplicationContext(context);
-  //   Application.run(applicationContext);
-  //
-  //   const simpleClass = applicationContext.get('simpleClass');
-  //   assert.exists(simpleClass, 'simpleClass exists');
-  // });
-  //
-  // it('ApplicationContext accepts plain old object with Prototype', () => {
-  //   const context = { name: 'SimpleClass', uuid: uuidv4(), scope: Scopes.PROTOTYPE };
-  //
-  //   const applicationContext = new ApplicationContext(context);
-  //   Application.run(applicationContext);
-  //
-  //   const simpleClass = applicationContext.get('simpleClass');
-  //   assert.exists(simpleClass, 'simpleClass exists');
-  // });
-  //
-  // it('ApplicationContext accepts plain old object, with require with Prototype', () => {
-  //   const context = { name: 'SimpleClass', require: './test/service/SimpleClass', scope: Scopes.PROTOTYPE };
-  //
-  //   const applicationContext = new ApplicationContext(context);
-  //   Application.run(applicationContext);
-  //
-  //   const simpleClass = applicationContext.get('simpleClass');
-  //   assert.exists(simpleClass, 'simpleClass exists');
-  //   assert.exists(simpleClass.uuid, 'simpleClass.uuid exists');
-  // });
-  //
-  // it('ApplicationContext accepts config context with Prototype', () => {
-  //   const ephemeralConfig = new EphemeralConfig(
-  //       {
-  //         context: {
-  //           SimpleClass: {
-  //             require: './test/service/SimpleClass',
-  //            scope: Scopes.PROTOTYPE
-  //           },
-  //         },
-  //       },
-  //   );
-  //
-  //   const applicationContext = new ApplicationContext();
-  //   applicationContext.config = ephemeralConfig;
-  //   Application.run(applicationContext);
-  //
-  //   const simpleClass = applicationContext.get('simpleClass');
-  //   assert.exists(simpleClass, 'simpleClass exists');
-  //   assert.exists(simpleClass.uuid, 'simpleClass.uuid exists');
-  // });
+
+  it('ApplicationContext throws nullish', async () => {
+
+    const applicationContext = new ApplicationContext({name:"aSingleton", attr:'${invalidpath}'});
+    await assert.isRejected(
+        applicationContext.start(),
+        Error,
+        "Failed to explicitly autowired placeholder component (aSingleton) property value (attr) from config.");
+  });
 });

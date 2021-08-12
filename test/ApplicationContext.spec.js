@@ -50,7 +50,8 @@ describe('ApplicationContext Specification', () => {
   it('ApplicationContext throws nullish', async () => {
 
     const applicationContext = new ApplicationContext([null]);
-    await assert.isRejected(applicationContext.start(), Error, "ApplicationContext (default) received a nullish context.");  });
+    await assert.isRejected(applicationContext.start(), Error, "ApplicationContext (default) received a nullish context.");
+  });
 
   it('ApplicationContext accepts nullish components', async () => {
 

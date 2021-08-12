@@ -100,6 +100,7 @@ module.exports = class ApplicationContext {
       this.deriveContextComponent({
         scope : Scopes.PROTOTYPE,
         wireFactory:'loggerFactory',
+        factoryFunction:'getLogger',
         name:'logger'})
     }
     if (!this.components['fetch'] && ApplicationContext.getGlobalRoot('fetch')){
@@ -132,7 +133,7 @@ module.exports = class ApplicationContext {
   }
 
   deriveContextComponent(contextComponent) {
-    if (contextComponent.name || contextComponent.Reference){
+    if (contextComponent.name || contextComponent.Reference || contextComponent.factory){
       this.parseContextComponent(contextComponent);
     } else {
       let contextKeys = Object.keys(contextComponent);
@@ -177,6 +178,10 @@ module.exports = class ApplicationContext {
     $component.qualifier = component.qualifier || _.lowerFirst(constructr?.qualifier);
     $component.scope = component.scope || _.lowerFirst(constructr?.scope) || Scopes.SINGLETON;
     $component.Reference = component.Reference;
+    $component.factory = component.factory;
+    $component.factoryFunction = component.factoryFunction;
+    $component.factoryArgs = component.factoryArgs;
+    $component.wireFactory = component.wireFactory;
     if (component.require) {
       $component.Reference = require(component.require);
       $component.isClass = ($component?.Reference?.prototype?.constructor !== undefined);
@@ -198,9 +203,8 @@ module.exports = class ApplicationContext {
       if ($component.isActive === false){
         let negations = _.filter($component.profiles,(profile) => profile.startsWith('!'));
         negations = _.map(negations, (profile) => profile.substring(1));
-        $component.isActive = negations.length > 0 && _.intersection(activeProfiles,negations).length > 0;
+        $component.isActive = negations.length > 0 && _.intersection(activeProfiles,negations).length == 0;
       }
-
     }
 
     if ($component.isActive) {
@@ -244,7 +248,7 @@ module.exports = class ApplicationContext {
     let placeholder = placeholderArg.substring(2,placeholderArg.length-1);
     let tuple = placeholder.split(':');
     let path = tuple[0]
-    let defaultValue = tuple[1] || null;
+    let defaultValue = tuple[1] || undefined;
     let returnValue = null;
     try {
       returnValue = this.config.get(path,JSON.parse(defaultValue));
@@ -353,15 +357,15 @@ module.exports = class ApplicationContext {
     logger.verbose('Initialising singletons completed');
   }
 
-  registerDestroyer(){
-    process.on('exit', destroyer.bind());
+  registerDestroyer(destroyer){
+    process.on('exit', destroyer?.bind());
     //catches ctrl+c event
-    process.on('SIGINT', destroyer.bind());
+    process.on('SIGINT', destroyer?.bind());
     // catches "kill pid" (for example: nodemon restart)
-    process.on('SIGUSR1', destroyer.bind());
-    process.on('SIGUSR2', destroyer.bind());
+    process.on('SIGUSR1', destroyer?.bind());
+    process.on('SIGUSR2', destroyer?.bind());
     //catches uncaught exceptions
-    process.on('uncaughtException', destroyer.bind());
+    process.on('uncaughtException', destroyer?.bind());
   }
   async registerSingletonDestroyers(){
     logger.verbose('Registering singleton destroyers started');
@@ -411,36 +415,37 @@ module.exports = class ApplicationContext {
       if (this.components[reference].isClass) {
         logger.verbose(`Component (${reference}) is scoped as (${Scopes.PROTOTYPE}), returning new instance.`);
         prototype = new this.components[reference].Reference();
-      } else if (typeof this.components[reference] === 'function') {
+      } else if (typeof this.components[reference].Reference === 'function') {
         let args = targetArgs || this.components[reference].factoryArgs;
         if (!Array.isArray(args)){
           args = [args];
         }
-        prototype = new this.components[reference](...args);
-      } else if (typeof this.components['factory'] === 'function') {
+        prototype = this.components[reference].Reference(...args);
+      } else if (typeof this.components[reference]['factory'] === 'function') {
         let args = this.components[reference].factoryArgs;
         if (!Array.isArray(args)) {
           args = [args];
         }
-        prototype =  this.components[reference](...args);
-      } else if (typeof this.components['factory'] === 'string' && typeof this.components['factoryFunction'] === 'string') {
+        prototype =  this.components[reference]['factory'](...args);
+      } else if (typeof this.components[reference]['factory'] === 'string' && typeof this.components[reference]['factoryFunction'] === 'string') {
         let args = this.components[reference]['factoryArgs'];
         if (!Array.isArray(args)) {
           args = [args];
         }
-        prototype =  this.get(this.components['factory'])[this.components['factoryFunction']](...args);
-      } else if (typeof this.components['wireFactory'] === 'function') {
+        prototype =  this.get(this.components[reference]['factory'])[this.components[reference]['factoryFunction']](...args);
+      } else if (typeof this.components[reference]['wireFactory'] === 'function') {
         let args = targetArgs;
         if (!Array.isArray(args)) {
           args = [args];
         }
-        prototype =  this.components['wireFactory'](...args);
-      } else if (typeof this.components['wireFactory'] === 'string') {
+        prototype =  this.components[reference]['wireFactory'](...args);
+      } else if (typeof this.components[reference]['wireFactory'] === 'string' && typeof this.components[reference]['factoryFunction'] === 'string') {
         let args = targetArgs;
         if (!Array.isArray(args)) {
           args = [args];
         }
-        prototype =  this.get(this.components['wireFactory'])(...args);
+        let factory = this.get(this.components[reference]['wireFactory'])
+        prototype =  factory[this.components[reference]['factoryFunction']](...args);
       }
       else {
         logger.verbose(`Component (${reference}) is scoped as (${Scopes.PROTOTYPE}), returning deep clone.`);
