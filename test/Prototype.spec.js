@@ -171,7 +171,7 @@ describe('Prototypes Specification', () => {
     applicationContext.start();
     const factoryProto = applicationContext.get('factoryProto');
     assert.exists(factoryProto, 'factoryProto exists');
-    assert.equal(factoryProto.attr, 'one', 'funcy.attr == one');
+    assert.equal(factoryProto.attr, 'one', 'factoryProto.attr == one');
   });
 
   it('Simple Singleton wires logger prototype with wireFactory', () => {
