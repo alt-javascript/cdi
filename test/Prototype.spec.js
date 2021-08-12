@@ -3,7 +3,7 @@ const { LoggerFactory } = require('@alt-javascript/logger');
 const { EphemeralConfig } = require('@alt-javascript/config');
 const { v4: uuidv4 } = require('uuid');
 const { ApplicationContext } = require('..');
-const { Context, Prototype, Scopes } = require('../context');
+const { Context, Prototype, Transient, Scopes } = require('../context');
 const SimpleClass = require('./service/SimpleClass');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/Prototype_spec');
@@ -141,7 +141,7 @@ describe('Prototypes Specification', () => {
   });
 
   it('Simple Prototype using factory function', () => {
-    const context = new Context([new Prototype({
+    const context = new Context([new Transient({
       name: 'funcy',
       factory: () => ({ attr: 'value' }),
       factoryArgs: 'one',

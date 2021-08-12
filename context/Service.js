@@ -6,7 +6,7 @@ module.exports = class Service extends Component {
         let options = (optionsArg?.Reference
             || optionsArg.factory
             || optionsArg.wireFactory) ? optionsArg : {Reference: optionsArg};
-        options.scope = Scopes.PROTOTYPE;
+        options.scope = Scopes.SINGLETON;
         super (options);
     }
 }

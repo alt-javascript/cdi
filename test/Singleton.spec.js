@@ -2,7 +2,7 @@ const { assert } = require('chai');
 const { LoggerFactory } = require('@alt-javascript/logger');
 const { ApplicationContext } = require('..');
 const {
-  Context, Component, Singleton,
+  Context, Component, Singleton, Service
 } = require('../context');
 const SimpleClass = require('./service/SimpleClass');
 
@@ -45,7 +45,7 @@ describe('Singleton Specification', () => {
   });
 
   it('Simple Singleton is a singleton', () => {
-    const context = new Context([new Singleton(SimpleClass)]);
+    const context = new Context([new Service(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);
     applicationContext.start();
