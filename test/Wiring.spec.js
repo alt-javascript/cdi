@@ -9,7 +9,7 @@ const ClassB = require('./service/ClassB');
 const ClassC = require('./service/ClassC');
 const SimpleConfigProperty = require('./service/SimpleConfigProperty');
 
-const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Wiring_spec');
+const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/Wiring_spec');
 const { assert } = chai;
 chai.use(chaiAsPromised);
 

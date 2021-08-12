@@ -4,7 +4,7 @@ const { LoggerFactory } = require('@alt-javascript/logger');
 
 test({ config });
 
-const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/fixtures/index');
+const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/fixtures/index');
 
 exports.mochaGlobalSetup = async function setup() {
   logger.verbose('mocha global setup: started');

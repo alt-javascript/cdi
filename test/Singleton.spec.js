@@ -6,7 +6,7 @@ const {
 } = require('../context');
 const SimpleClass = require('./service/SimpleClass');
 
-const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Singleton_spec');
+const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/Singleton_spec');
 
 before(async () => {
   logger.verbose('before spec setup started');

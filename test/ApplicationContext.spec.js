@@ -7,7 +7,7 @@ const { ApplicationContext } = require('..');
 const { Context, Component } = require('../context');
 const SimpleClass = require('./service/SimpleClass');
 
-const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/ApplicationContext_spec');
+const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/ApplicationContext_spec');
 const { assert } = chai;
 chai.use(chaiAsPromised);
 

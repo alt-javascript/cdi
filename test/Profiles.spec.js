@@ -2,7 +2,7 @@ const { assert } = require('chai');
 const { LoggerFactory } = require('@alt-javascript/logger');
 const { ApplicationContext } = require('..');
 
-const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Profiles_spec');
+const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/Profiles_spec');
 
 before(async () => {
   logger.verbose('before spec setup started');

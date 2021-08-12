@@ -5,7 +5,7 @@ const {
   Context, Component, Property, Scopes,
 } = require('./context');
 
-const logger = LoggerFactory.getLogger('@alt-javascript/contexts/ApplicationContext');
+const logger = LoggerFactory.getLogger('@alt-javascript/cdi/ApplicationContext');
 
 module.exports = class ApplicationContext {
   // eslint-disable-next-line
