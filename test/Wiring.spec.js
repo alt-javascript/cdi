@@ -10,7 +10,7 @@ const ClassC = require('./service/ClassC');
 const SimpleConfigProperty = require('./service/SimpleConfigProperty');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/Wiring_spec');
-const assert = chai.assert;
+const { assert } = chai;
 chai.use(chaiAsPromised);
 
 before(async () => {
@@ -39,7 +39,10 @@ beforeEach(async () => {
 
 describe('Wiring Specification', () => {
   it('Classes A & B exist and are autowired by default', () => {
-    const context = new Context([new Component(ClassA), new Component(ClassB),new Component(ClassC)]);
+    const context = new Context([
+      new Component(ClassA),
+      new Component(ClassB),
+      new Component(ClassC)]);
 
     const applicationContext = new ApplicationContext([context]);
     applicationContext.start();
@@ -55,8 +58,6 @@ describe('Wiring Specification', () => {
     assert.isNull(classB.attribute, 'classB.attribute is null');
     assert.isNull(classC.attribute, 'classC.attribute is null');
   });
-
-
 
   it('SimpleConfigProperty is autowired from config by default', () => {
     const ephemeralConfig = new EphemeralConfig(
@@ -81,8 +82,8 @@ describe('Wiring Specification', () => {
 
   it('SimpleConfigProperty is wired from context Property definition', () => {
     const context = new Context([new Component({
-      Reference:SimpleConfigProperty,
-      properties: [new Property ({name:'attribute', value: 3})]
+      Reference: SimpleConfigProperty,
+      properties: [new Property({ name: 'attribute', value: 3 })],
     })]);
 
     const applicationContext = new ApplicationContext([context]);
@@ -92,13 +93,12 @@ describe('Wiring Specification', () => {
     assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
     assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
     assert.equal(simpleConfigProperty.attribute, 3, 'simpleClass.attribute == 3');
-
   });
 
   it('SimpleConfigProperty is wired from context property object', () => {
     const context = new Context([new Component({
-      Reference:SimpleConfigProperty,
-      properties: [ {name:'attribute', value: 3}]
+      Reference: SimpleConfigProperty,
+      properties: [{ name: 'attribute', value: 3 }],
     })]);
 
     const applicationContext = new ApplicationContext([context]);
@@ -108,15 +108,15 @@ describe('Wiring Specification', () => {
     assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
     assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
     assert.equal(simpleConfigProperty.attribute, 3, 'simpleClass.attribute == 3');
-
   });
 
   it('ApplicationContext throws nullish', async () => {
-
-    const applicationContext = new ApplicationContext({name:"aSingleton", attr:'${invalidpath}'});
+    // eslint-disable-next-line no-template-curly-in-string
+    const applicationContext = new ApplicationContext({ name: 'aSingleton', attr: '${invalidpath}' });
     await assert.isRejected(
-        applicationContext.start(),
-        Error,
-        "Failed to explicitly autowired placeholder component (aSingleton) property value (attr) from config.");
+      applicationContext.start(),
+      Error,
+      'Failed to explicitly autowired placeholder component (aSingleton) property value (attr) from config.',
+    );
   });
 });

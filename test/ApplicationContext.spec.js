@@ -8,9 +8,8 @@ const { Context, Component } = require('../context');
 const SimpleClass = require('./service/SimpleClass');
 
 const logger = LoggerFactory.getLogger('@alt-javascript/contexts/test/ApplicationContext_spec');
-const assert = chai.assert;
+const { assert } = chai;
 chai.use(chaiAsPromised);
-
 
 before(async () => {
   logger.verbose('before spec setup started');
@@ -48,21 +47,19 @@ describe('ApplicationContext Specification', () => {
   });
 
   it('ApplicationContext throws nullish', async () => {
-
     const applicationContext = new ApplicationContext([null]);
-    await assert.isRejected(applicationContext.start(), Error, "ApplicationContext (default) received a nullish context.");
+    await assert.isRejected(applicationContext.start(), Error, 'ApplicationContext (default) received a nullish context.');
   });
 
   it('ApplicationContext accepts nullish components', async () => {
-
     const applicationContext = new ApplicationContext([new Context(null)]);
-    await assert.isFulfilled(applicationContext.start(), "new ApplicationContext([new Context(null)] is ok");
+    await assert.isFulfilled(applicationContext.start(), 'new ApplicationContext([new Context(null)] is ok');
   });
   it('ApplicationContext fails on dupe', async () => {
-    const context = new Context([new Component(SimpleClass),new Component(SimpleClass)]);
+    const context = new Context([new Component(SimpleClass), new Component(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);
-    await assert.isRejected(applicationContext.start(), Error, "Duplicate definition of application context component (simpleClass)");
+    await assert.isRejected(applicationContext.start(), Error, 'Duplicate definition of application context component (simpleClass)');
   });
 
   it('ApplicationContext accepts Context array', () => {

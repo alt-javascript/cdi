@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@alt-javascript/boot": "^1.0.10",
+    "@babel/eslint-parser": "^7.15.0",
     "@cucumber/cucumber": "^7.3.1",
     "babel-eslint": "^10.1.0",
     "chai": "^4.3.4",

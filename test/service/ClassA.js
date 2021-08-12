@@ -3,10 +3,4 @@ module.exports = class ClassA {
     this.classB = null;
     this.attribute = null;
   }
-
-  init () {
-  }
-
-  destroy (){
-  }
 };
