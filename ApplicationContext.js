@@ -385,14 +385,16 @@ module.exports = class ApplicationContext {
   }
 
   static registerDestroyer(destroyer) {
-    process.on('exit', destroyer?.bind());
-    // catches ctrl+c event
-    process.on('SIGINT', destroyer?.bind());
-    // catches "kill pid" (for example: nodemon restart)
-    process.on('SIGUSR1', destroyer?.bind());
-    process.on('SIGUSR2', destroyer?.bind());
-    // catches uncaught exceptions
-    process.on('uncaughtException', destroyer?.bind());
+    if (destroyer){
+      process.on('exit', destroyer?.bind());
+      // catches ctrl+c event
+      process.on('SIGINT', destroyer?.bind());
+      // catches "kill pid" (for example: nodemon restart)
+      process.on('SIGUSR1', destroyer?.bind());
+      process.on('SIGUSR2', destroyer?.bind());
+      // catches uncaught exceptions
+      process.on('uncaughtException', destroyer?.bind());
+    }
   }
 
   async registerSingletonDestroyers() {
