@@ -1,3 +1,8 @@
+1.0.6 / 2021-08-16
+==================
+
+* Fix autowire bug, pass self to destroyer - @craigparra
+  
 1.0.5 / 2021-08-16
 ==================
 

@@ -181,10 +181,10 @@ module.exports = class ApplicationContext {
         && component?.constructor?.name !== 'Singleton'
         && component?.constructor?.name !== 'Prototype') {
       component = new Component(
-        component, component.name,
-        component.qualifier,
-        component.scope,
-        component.properties, component.profiles,
+          component, component.name,
+          component.qualifier,
+          component.scope,
+          component.properties, component.profiles,
       );
       component.require = componentArg.require;
     }
@@ -285,7 +285,8 @@ module.exports = class ApplicationContext {
     const insKeys = Object.keys(instance);
     for (let j = 0; j < insKeys.length; j++) {
       const property = instance[insKeys[j]];
-      const autowire = property?.name === 'Autowired' || _.lowerCase(property) === 'autowired';
+      const autowire = property?.name === 'Autowired'
+          || (typeof property === 'string' && _.lowerCase(property)) === 'autowired';
       if (autowire) {
         // eslint-disable-next-line no-param-reassign
         instance[insKeys[j]] = this.get(insKeys[j], undefined, component);
@@ -386,7 +387,7 @@ module.exports = class ApplicationContext {
 
   static registerDestroyer(destroyer) {
     if (destroyer){
-      process.on('exit', destroyer?.bind());
+      // process.on('exit', destroyer?.bind());
       // catches ctrl+c event
       process.on('SIGINT', destroyer?.bind());
       // catches "kill pid" (for example: nodemon restart)
@@ -405,19 +406,17 @@ module.exports = class ApplicationContext {
       if (component.scope === Scopes.SINGLETON) {
         let destroyer = null;
         if (typeof component.instance.destroy === 'function') {
-          destroyer = component.instance.destroy;
+          destroyer = () => component.instance.destroy(component.instance);
         } else if (typeof component.destroy === 'string') {
-          destroyer = component.instance[component.destroy]();
+          destroyer = () => component.instance[component.destroy](component.instance);
         }
         ApplicationContext.registerDestroyer(destroyer);
-        ApplicationContext.registerDestroyer(() => {
-          logger.verbose(`ApplicationContext (${this.name}) lifecycle completed.`);
-        });
-
         logger.verbose(`Registering singleton (${component.name}) destroyer`);
       }
     }
-
+    ApplicationContext.registerDestroyer(() => {
+      logger.verbose(`ApplicationContext (${this.name}) lifecycle completed.`);
+    });
     logger.verbose('Registering singleton destroyers completed');
   }
 
@@ -465,7 +464,7 @@ module.exports = class ApplicationContext {
           args = [args];
         }
         prototype = this.get(
-          this.components[reference].factory,
+            this.components[reference].factory,
         )[this.components[reference].factoryFunction](...args);
       } else if (typeof this.components[reference].wireFactory === 'function') {
         let args = targetArgs;
