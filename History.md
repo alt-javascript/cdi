@@ -1,3 +1,8 @@
+1.0.7 / 2021-10-08
+==================
+
+* Fix autowire bug, accept no default configpath - @craigparra
+
 1.0.6 / 2021-08-16
 ==================
 

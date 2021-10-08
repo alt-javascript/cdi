@@ -272,7 +272,7 @@ module.exports = class ApplicationContext {
     const defaultValue = tuple[1] || undefined;
     let returnValue = null;
     try {
-      returnValue = this.config.get(path, JSON.parse(defaultValue));
+         returnValue = this.config.get(path, defaultValue ? JSON.parse(defaultValue) : defaultValue);
     } catch (e) {
       const msg = `Failed to resolve placeholder component property value (${path}) from config.`;
       logger.error(msg);

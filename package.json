@@ -1,6 +1,6 @@
 {
   "name": "@alt-javascript/cdi",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "",
   "author": "Craig Parravicini",
   "keywords": [
@@ -33,8 +33,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@alt-javascript/config": "^1.0.11",
-    "@alt-javascript/logger": "^1.1.9",
+    "@alt-javascript/config": "^1.0.12",
+    "@alt-javascript/logger": "^1.1.10",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

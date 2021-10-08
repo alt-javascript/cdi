@@ -59,7 +59,7 @@ describe('Wiring Specification', () => {
     assert.isNull(classC.attribute, 'classC.attribute is null');
   });
 
-  it('SimpleConfigProperty is autowired from config by default', () => {
+  it('SimpleConfigProperty is autowired from config', () => {
     const ephemeralConfig = new EphemeralConfig(
       {
         pathtovalue: 1,
@@ -69,6 +69,47 @@ describe('Wiring Specification', () => {
           },
         },
       },
+    );
+
+    const applicationContext = new ApplicationContext({ config: ephemeralConfig });
+    applicationContext.start();
+
+    const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
+    assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
+    assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
+    assert.equal(simpleConfigProperty.attribute, 1, 'simpleClass.attribute == 1');
+  });
+
+  it('SimpleConfigProperty is autowired from config by default', () => {
+    const ephemeralConfig = new EphemeralConfig(
+        {
+          context: {
+            SimpleConfigProperty: {
+              require: './test/service/SimpleConfigProperty',
+            },
+          },
+        },
+    );
+
+    const applicationContext = new ApplicationContext({ config: ephemeralConfig });
+    applicationContext.start();
+
+    const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
+    assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
+    assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
+    assert.equal(simpleConfigProperty.attribute, 2, 'simpleClass.attribute == 1');
+  });
+
+  it('NoDefaultConfigProperty is autowired from config', () => {
+    const ephemeralConfig = new EphemeralConfig(
+        {
+          pathtovalue: 1,
+          context: {
+            SimpleConfigProperty: {
+              require: './test/service/NoDefaultConfigProperty',
+            },
+          },
+        },
     );
 
     const applicationContext = new ApplicationContext({ config: ephemeralConfig });
