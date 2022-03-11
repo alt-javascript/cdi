@@ -39,7 +39,7 @@
   "license": "MIT",
   "dependencies": {
     "@alt-javascript/config": "^2.0.0",
-    "@alt-javascript/logger": "^2.0.0",
+    "@alt-javascript/logger": "^2.0.2",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
