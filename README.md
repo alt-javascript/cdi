@@ -24,8 +24,8 @@ the class definition. The default scope is `singleton`, and the component name d
 of the class name.
 
 ```javascript
-const { ApplicationContext } = require('@alt-javascript/cdi');
-const { SimpleClass } = require('.');
+import { ApplicationContext } from '@alt-javascript/cdi';
+import { SimpleClass } from'./index.js';
 
 const applicationContext = new ApplicationContext(SimpleClass);
 applicationContext.start();
@@ -34,8 +34,8 @@ applicationContext.get('simpleClass');
 Simple types, objects and functions can be registered as components.
 
 ```javascript
-const { ApplicationContext } = require('@alt-javascript/cdi');
-const { SimpleClass } = require('.');
+import { ApplicationContext } from '@alt-javascript/cdi';
+import { SimpleClass } from './index.js';
 
 const applicationContext = new ApplicationContext([
     {name: 'someData', attr:'aValue', behave: () => {}},
@@ -49,8 +49,8 @@ applicationContext.get('aFunc')('world!');
 Singletons can also be defined with the common alias names `Service`,`Component` and `Singleton`
 
 ```javascript
-const { ApplicationContext, Singleton, Service, Component } = require('@alt-javascript/cdi');
-const { SimpleSingleton, SimpleService, SimpleSingleton } = require('.');
+import { ApplicationContext, Singleton, Service, Component } from '@alt-javascript/cdi';
+const { SimpleSingleton, SimpleService, SimpleSingleton } from './index.js';
 
 const context = new Context([
     new Singleton(SimpleSingleton), 
@@ -68,8 +68,8 @@ Prototype, or transient scoped objects can be defined with Prototype definition,
 objects are created each time they are requested from the context, or wired by the context lifecycle.
 
 ```javascript
-const { ApplicationContext, Prototype, Transient } = require('@alt-javascript/cdi');
-const { SimpleClass, SimpleTransient } = require('.');
+import { ApplicationContext, Prototype, Transient }  from '@alt-javascript/cdi';
+import { SimpleClass, SimpleTransient }  from './index.js';
 
 const applicationContext = new ApplicationContext(new Prototype(SimpleClass));
 const applicationContext = new ApplicationContext(new Transient(SimpleTransient));
@@ -82,8 +82,8 @@ applicationContext.get('simpleClass');
 Use the Component class to declare the full explicit definition of a component, allow full control.
 
 ```javascript
-const { ApplicationContext, Component } = require('@alt-javascript/cdi');
-const { SimpleClass, SimpleTransient } = require('.');
+import { ApplicationContext, Component }  from '@alt-javascript/cdi';
+import { SimpleClass, SimpleTransient } from './index.js';
 
 const applicationContext = new ApplicationContext(
     new Component({
@@ -102,8 +102,8 @@ applicationContext.get('useAnExplicitName');
 A component can be created by referencing a factory function directly.
 
 ```javascript
-const { ApplicationContext, Component } = require('@alt-javascript/cdi');
-const { MyClass } = require('.');
+import { ApplicationContext, Component } from '@alt-javascript/cdi';
+import { MyClass }  from './index.js';
 
 const applicationContext = new ApplicationContext(
     new Component({
@@ -123,7 +123,7 @@ but `classD`, which is non-null will be let alone.  The `attribute` will remain 
 context.
 
 ```javascript
-module.exports = class ClassA {
+export default class ClassA {
   constructor() {
     this.classB = null;
     this.classC = 'autowired';
@@ -136,7 +136,7 @@ module.exports = class ClassA {
 Configuration values that are booted with `@alt-javascript/boot` are injected with the familiar placeholder syntax.
 
 ```javascript
-module.exports = class ClassA {
+export default class ClassA {
   constructor() {
     this.attribute = '${get.this.from.config}';
   }
