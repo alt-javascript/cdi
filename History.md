@@ -3,7 +3,6 @@
 
 * Migrate to ESM module standard - @craigparra
 * Browser native support EMS bundles - @craigparra
-* Replace lodash dependency with JavaScript native alternatives - @craigparra
 * GitHub workflow - @craigparra
   
 1.0.7 / 2021-10-08
