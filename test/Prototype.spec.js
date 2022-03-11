@@ -1,10 +1,13 @@
-const { assert } = require('chai');
-const { LoggerFactory } = require('@alt-javascript/logger');
-const { EphemeralConfig } = require('@alt-javascript/config');
-const { v4: uuidv4 } = require('uuid');
-const { ApplicationContext } = require('..');
-const { Context, Prototype, Transient, Scopes } = require('../context');
-const SimpleClass = require('./service/SimpleClass');
+/* eslint-disable import/extensions */
+import { assert } from 'chai';
+import { LoggerFactory } from '@alt-javascript/logger';
+import { EphemeralConfig } from '@alt-javascript/config';
+import { v4 as uuidv4 } from 'uuid';
+import { ApplicationContext } from '../index.js';
+import {
+  Context, Prototype, Transient, Scopes,
+} from '../context/index.js';
+import SimpleClass from './service/SimpleClass.js';
 
 const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/Prototype_spec');
 
@@ -96,7 +99,12 @@ describe('Prototypes Specification', () => {
   });
 
   it('ApplicationContext accepts plain old object, with require with Prototype', () => {
-    const context = { name: 'SimpleClass', require: './test/service/SimpleClass', scope: Scopes.PROTOTYPE };
+    const context = {
+      name: 'SimpleClass',
+      Reference: SimpleClass,
+      // require: './test/service/SimpleClass',
+      scope: Scopes.PROTOTYPE,
+    };
 
     const applicationContext = new ApplicationContext(context);
     applicationContext.start();
@@ -111,7 +119,8 @@ describe('Prototypes Specification', () => {
       {
         context: {
           SimpleClass: {
-            require: './test/service/SimpleClass',
+            // require: './test/service/SimpleClass',
+            Reference: SimpleClass,
             scope: Scopes.PROTOTYPE,
           },
         },

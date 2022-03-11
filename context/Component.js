@@ -1,4 +1,4 @@
-module.exports = class Component {
+export default class Component {
     constructor(options) {
         this.Reference = options?.Reference || (options.factory || options.wireFactory ? null : options );
         this.name = options?.name;

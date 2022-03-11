@@ -1,6 +1,7 @@
-const { assert } = require('chai');
-const { LoggerFactory } = require('@alt-javascript/logger');
-const { ApplicationContext } = require('..');
+/* eslint-disable import/extensions */
+import { assert } from 'chai';
+import { LoggerFactory } from '@alt-javascript/logger';
+import { ApplicationContext } from '../index.js';
 
 const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/Profiles_spec');
 

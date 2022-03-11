@@ -1,12 +1,13 @@
-const Component = require('./Component');
-const Scopes = require('./Scopes');
+/* eslint-disable import/extensions */
+import Component from './Component.js';
+import Scopes from './Scopes.js';
 
-module.exports = class Prototype extends Component {
-    constructor(optionsArg) {
-        let options = (optionsArg?.Reference
+export default class Prototype extends Component {
+  constructor(optionsArg) {
+    const options = (optionsArg?.Reference
             || optionsArg.factory
-            || optionsArg.wireFactory) ? optionsArg : {Reference: optionsArg};
-        options.scope = Scopes.PROTOTYPE;
-        super (options);
-    }
+            || optionsArg.wireFactory) ? optionsArg : { Reference: optionsArg };
+    options.scope = Scopes.PROTOTYPE;
+    super(options);
+  }
 }

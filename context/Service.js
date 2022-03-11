@@ -1,7 +1,8 @@
-const Component = require('./Component');
-const Scopes = require('./Scopes');
+/* eslint-disable import/extensions */
+import Component from './Component.js';
+import Scopes from './Scopes.js';
 
-module.exports = class Service extends Component {
+export default class Service extends Component {
     constructor(optionsArg) {
         let options = (optionsArg?.Reference
             || optionsArg.factory

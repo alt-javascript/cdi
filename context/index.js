@@ -1,8 +1,8 @@
-module.exports.Context = require('./Context');
-module.exports.Component = require('./Component');
-module.exports.Property = require('./Property');
-module.exports.Prototype = require('./Prototype');
-module.exports.Scopes = require('./Scopes');
-module.exports.Singleton = require('./Singleton');
-module.exports.Service = require('./Service');
-module.exports.Transient = require('./Transient');
+export { default as Context } from './Context.js';
+export { default as Component } from './Component.js';
+export { default as Property } from './Property.js';
+export { default as Prototype } from './Prototype.js';
+export { default as Scopes } from './Scopes.js';
+export { default as Singleton } from './Singleton.js';
+export { default as Service } from './Service.js';
+export { default as Transient } from './Transient.js';

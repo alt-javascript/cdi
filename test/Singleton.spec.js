@@ -1,10 +1,11 @@
-const { assert } = require('chai');
-const { LoggerFactory } = require('@alt-javascript/logger');
-const { ApplicationContext } = require('..');
-const {
-  Context, Component, Singleton, Service
-} = require('../context');
-const SimpleClass = require('./service/SimpleClass');
+/* eslint-disable import/extensions */
+import { assert } from 'chai';
+import { LoggerFactory } from '@alt-javascript/logger';
+import { ApplicationContext } from '../index.js';
+import {
+  Context, Component, Singleton, Service,
+} from '../context/index.js';
+import SimpleClass from './service/SimpleClass.js';
 
 const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/Singleton_spec');
 

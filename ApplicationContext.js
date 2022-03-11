@@ -1,13 +1,14 @@
-const _ = require('lodash');
-const LoggerFactory = require('@alt-javascript/logger/LoggerFactory');
-const { EphemeralConfig, ConfigFactory } = require('@alt-javascript/config');
-const {
+/* eslint-disable import/extensions */
+import _ from 'lodash';
+import LoggerFactory from '@alt-javascript/logger/LoggerFactory.js';
+import { EphemeralConfig, ConfigFactory } from '@alt-javascript/config';
+import {
   Context, Component, Property, Scopes,
-} = require('./context');
+} from './context/index.js';
 
 const logger = LoggerFactory.getLogger('@alt-javascript/cdi/ApplicationContext');
 
-module.exports = class ApplicationContext {
+export default class ApplicationContext {
   // eslint-disable-next-line
   static DEFAULT_CONTEXT_NAME = 'default';
 
@@ -181,10 +182,10 @@ module.exports = class ApplicationContext {
         && component?.constructor?.name !== 'Singleton'
         && component?.constructor?.name !== 'Prototype') {
       component = new Component(
-          component, component.name,
-          component.qualifier,
-          component.scope,
-          component.properties, component.profiles,
+        component, component.name,
+        component.qualifier,
+        component.scope,
+        component.properties, component.profiles,
       );
       component.require = componentArg.require;
     }
@@ -200,10 +201,13 @@ module.exports = class ApplicationContext {
     $component.factoryFunction = component.factoryFunction;
     $component.factoryArgs = component.factoryArgs;
     $component.wireFactory = component.wireFactory;
+    //TODO - dynamic import (async)
     if (component.require) {
       // eslint-disable-next-line
-      $component.Reference = require(component.require);
-      $component.isClass = ($component?.Reference?.prototype?.constructor !== undefined);
+      // import(component.require).then(
+      //   (module) => { $component.Reference = module.default(); },
+      // );
+      // $component.isClass = ($component?.Reference?.prototype?.constructor !== undefined);
     }
 
     $component.properties = component.properties || constructr?.properties;
@@ -272,7 +276,7 @@ module.exports = class ApplicationContext {
     const defaultValue = tuple[1] || undefined;
     let returnValue = null;
     try {
-         returnValue = this.config.get(path, defaultValue ? JSON.parse(defaultValue) : defaultValue);
+      returnValue = this.config.get(path, defaultValue ? JSON.parse(defaultValue) : defaultValue);
     } catch (e) {
       const msg = `Failed to resolve placeholder component property value (${path}) from config.`;
       logger.error(msg);
@@ -386,7 +390,7 @@ module.exports = class ApplicationContext {
   }
 
   static registerDestroyer(destroyer) {
-    if (destroyer){
+    if (destroyer) {
       // process.on('exit', destroyer?.bind());
       // catches ctrl+c event
       process.on('SIGINT', destroyer?.bind());
@@ -464,7 +468,7 @@ module.exports = class ApplicationContext {
           args = [args];
         }
         prototype = this.get(
-            this.components[reference].factory,
+          this.components[reference].factory,
         )[this.components[reference].factoryFunction](...args);
       } else if (typeof this.components[reference].wireFactory === 'function') {
         let args = targetArgs;
@@ -493,4 +497,4 @@ module.exports = class ApplicationContext {
     }
     return defaultValue;
   }
-};
+}

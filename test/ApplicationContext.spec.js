@@ -1,13 +1,14 @@
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
-const { LoggerFactory } = require('@alt-javascript/logger');
-const { EphemeralConfig } = require('@alt-javascript/config');
-const { v4: uuidv4 } = require('uuid');
-const { ApplicationContext } = require('..');
-const { Context, Component } = require('../context');
-const SimpleClass = require('./service/SimpleClass');
+/* eslint-disable import/extensions */
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+import { LoggerFactory } from '@alt-javascript/logger';
+import { EphemeralConfig } from '@alt-javascript/config';
+import { v4 as uuidv4 } from 'uuid';
+import { ApplicationContext } from '../index.js';
+import { Context, Component } from '../context/index.js';
+import SimpleClass from './service/SimpleClass.js';
 
-const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/ApplicationContext_spec');
+const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/ApplicationContext_spec.js');
 const { assert } = chai;
 chai.use(chaiAsPromised);
 
@@ -112,24 +113,24 @@ describe('ApplicationContext Specification', () => {
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('ApplicationContext accepts plain old object, with require', () => {
-    const context = { name: 'SimpleClass', require: './test/service/SimpleClass' };
-
-    const applicationContext = new ApplicationContext(context);
-    applicationContext.start();
-
-    const simpleClass = applicationContext.get('simpleClass');
-    assert.exists(simpleClass, 'simpleClass exists');
-    assert.exists(simpleClass.uuid, 'simpleClass.uuid exists');
-  });
+  // it('ApplicationContext accepts plain old object, with require', () => {
+  //   const context = { name: 'SimpleClass',
+  //     require: './test/service/SimpleClass',
+  //   };
+  //
+  //   const applicationContext = new ApplicationContext(context);
+  //   applicationContext.start();
+  //
+  //   const simpleClass = applicationContext.get('simpleClass');
+  //   assert.exists(simpleClass, 'simpleClass exists');
+  //   assert.exists(simpleClass.uuid, 'simpleClass.uuid exists');
+  // });
 
   it('ApplicationContext accepts config context', () => {
     const ephemeralConfig = new EphemeralConfig(
       {
         context: {
-          SimpleClass: {
-            require: './test/service/SimpleClass',
-          },
+          Reference: SimpleClass,
         },
       },
     );

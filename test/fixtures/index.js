@@ -1,19 +1,20 @@
-const { config } = require('@alt-javascript/config');
-const { test } = require('@alt-javascript/boot');
-const { LoggerFactory } = require('@alt-javascript/logger');
+/* eslint-disable import/extensions */
+import { config } from '@alt-javascript/config';
+import { test } from '@alt-javascript/boot';
+import { LoggerFactory } from '@alt-javascript/logger';
 
 test({ config });
 
 const logger = LoggerFactory.getLogger('@alt-javascript/cdi/test/fixtures/index');
 
-exports.mochaGlobalSetup = async function setup() {
+export async function mochaGlobalSetup() {
   logger.verbose('mocha global setup: started');
   //  ...
   logger.verbose('mocha global setup: completed');
-};
+}
 
-exports.mochaGlobalTeardown = async function teardown() {
+export async function mochaGlobalTeardown() {
   logger.verbose('mocha global teardown: started');
   //  ...
   logger.verbose('mocha global teardown: completed');
-};
+}

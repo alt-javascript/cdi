@@ -1,4 +1,4 @@
-module.exports = class Scopes {
+export default class Scopes {
     static SINGLETON = 'singleton';
     static SERVICE = 'singleton';
     static PROTOTYPE = 'prototype';
