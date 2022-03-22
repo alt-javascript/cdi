@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import LoggerFactory from '@alt-javascript/logger/LoggerFactory.js';
-import { ConfigFactory, EphemeralConfig } from '@alt-javascript/config';
+import _ from 'https://cdn.jsdelivr.net/npm/lodash-es/lodash.min.js';
+import { LoggerFactory } from 'https://cdn.jsdelivr.net/npm/@alt-javascript/logger@2/dist/alt-javascript-logger-esm.js';
+import { ConfigFactory } from 'https://cdn.jsdelivr.net/npm/@alt-javascript/config@2/dist/alt-javascript-config-esm.js';
 
 /* eslint-disable import/extensions */
 class Context {
@@ -49,7 +49,7 @@ class Scopes {
 
 /* eslint-disable import/extensions */
 
-const logger = LoggerFactory.getLogger('@alt-javascript/cdi/ApplicationContext');
+const logger = { LoggerFactory }.getLogger('@alt-javascript/cdi/ApplicationContext');
 
 class ApplicationContext {
   // eslint-disable-next-line
@@ -94,7 +94,7 @@ class ApplicationContext {
     this.configContextPath = options?.configContextPath
         || process.env.NODE_CONFIG_CONTEXT_PATH
         || ApplicationContext.DEFAULT_CONFIG_CONTEXT_PATH;
-    this.config = options?.config || ConfigFactory.getConfig(new EphemeralConfig({}));
+    this.config = options?.config || { ConfigFactory }.getConfig({});
     if (options?.config) {
       // eslint-disable-next-line no-param-reassign
       delete options.config;
