@@ -16,6 +16,29 @@ wiring (injection) of property references and config placeholders.
 
 <a name="usage">Usage</a>
 --------------------------------
+### Browser
+
+The module is also able to be used directly in the browser, in combination with the logger and config modules.
+You can either import the ApplicationContext globally as an IIFE (Immediately Invoked Function Expression),
+as follows:
+
+```html
+   <script src="https://cdn.jsdelivr.net/npm/@alt-javascript/cdi/dist/alt-javascript-applicationcontext-iife.js"></script>
+    <script>
+        import { SimpleClass } from'./index.js';
+
+        const applicationContext = new ApplicationContext(SimpleClass);
+    </script>
+```
+
+Or import the ES6 module bundle from a module, as follows:
+
+```javascript
+import { ApplicationContext } from 'https://cdn.jsdelivr.net/npm/@alt-javascript/cdi/dist/alt-javascript-cdi-esm.js'
+import { SimpleClass } from'./index.js';
+
+const applicationContext = new ApplicationContext(SimpleClass);
+```
 
 ### Singleton Components
 
