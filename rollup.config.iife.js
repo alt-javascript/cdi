@@ -1,4 +1,3 @@
-
 export default [
   // IIFE bundle for browsers global import.
   {
@@ -13,11 +12,11 @@ export default [
       freeze: false,
       sourcemap: false,
       sourcemapExcludeSources: true,
-      globals : {
-        'lodash' : '_',
-        '@alt-javascript/config/ConfigFactory.js' : 'ConfigFactory',
-        '@alt-javascript/logger/LoggerFactory.js' : 'LoggerFactory'
-      }
+      globals: {
+        lodash: '_',
+        '@alt-javascript/config/ConfigFactory.js': 'ConfigFactory',
+        '@alt-javascript/logger/LoggerFactory.js': 'LoggerFactory',
+      },
     },
   },
 ];

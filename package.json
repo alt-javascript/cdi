@@ -39,7 +39,7 @@
     "build-iife": "npm run minify-iife -- -o dist/alt-javascript-applicationcontext-iife-min.js --source-map",
     "build": "npm run bundle-esm && npm run build-esm && npm run iifify && npm run bundle-iife && npm run uniifify && npm run build-iife ",
     "iifify": "shx sed -i s/{\\ ConfigFactory\\ }/ConfigFactory/g ApplicationContext.js && shx sed -i s/{\\ LoggerFactory\\ }/LoggerFactory/g ApplicationContext.js",
-    "uniifify": "shx sed -i s/ConfigFactory/{\\ ConfigFactory\\ }/g ApplicationContext.js && shx sed -i s/LoggerFactory/{\\ LoggerFactory\\ }/g ApplicationContext.js"
+    "uniifify": "shx sed -i s/ConfigFactory\\ /{\\ ConfigFactory\\ }\\ /g ApplicationContext.js && shx sed -i s/LoggerFactory\\ /{\\ LoggerFactory\\ }\\ /g ApplicationContext.js"
   },
   "license": "MIT",
   "dependencies": {

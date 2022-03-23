@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import esmImportToUrl from 'rollup-plugin-esm-import-to-url';
 
 export default [
@@ -7,9 +8,9 @@ export default [
     treeshake: true,
     plugins: [esmImportToUrl({
       imports: {
-        'lodash': 'https://cdn.jsdelivr.net/npm/lodash-es/lodash.min.js',
-        '@alt-javascript/config' : 'https://cdn.jsdelivr.net/npm/@alt-javascript/config@2/dist/alt-javascript-config-esm.js',
-        '@alt-javascript/logger' : 'https://cdn.jsdelivr.net/npm/@alt-javascript/logger@2/dist/alt-javascript-logger-esm.js',
+        lodash: 'https://cdn.jsdelivr.net/npm/lodash-es/lodash.min.js',
+        '@alt-javascript/config': 'https://cdn.jsdelivr.net/npm/@alt-javascript/config@2/dist/alt-javascript-config-esm.js',
+        '@alt-javascript/logger': 'https://cdn.jsdelivr.net/npm/@alt-javascript/logger@2/dist/alt-javascript-logger-esm.js',
       },
     })],
 
