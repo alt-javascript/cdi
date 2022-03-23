@@ -34,30 +34,30 @@ beforeEach(async () => {
 });
 
 describe('Singleton Specification', () => {
-  it('Simple Component is a singleton', () => {
+  it('Simple Component is a singleton', async() => {
     const context = new Context([new Component(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await applicationContext.start();
     const simpleClass = applicationContext.get('simpleClass');
     const simpleClass2 = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
     assert.equal(simpleClass.uuid, simpleClass2.uuid, 'simpleClass.uuid === simpleClass2.uuid');
   });
 
-  it('Simple Singleton is a singleton', () => {
+  it('Simple Singleton is a singleton', async () => {
     const context = new Context([new Service(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await applicationContext.start();
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
   });
-  it('Simple Singleton is a singleton using Reference', () => {
+  it('Simple Singleton is a singleton using Reference', async () => {
     const context = new Context([new Singleton({ Reference: SimpleClass })]);
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await applicationContext.start();
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
   });

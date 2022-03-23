@@ -39,14 +39,14 @@ beforeEach(async () => {
 });
 
 describe('Wiring Specification', () => {
-  it('Classes A & B exist and are autowired by default', () => {
+  it('Classes A & B exist and are autowired by default', async() => {
     const context = new Context([
       new Component(ClassA),
       new Component(ClassB),
       new Component(ClassC)]);
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await applicationContext.start();
     const classA = applicationContext.get('classA');
     const classB = applicationContext.get('classB');
     const classC = applicationContext.get('classC');
@@ -60,7 +60,7 @@ describe('Wiring Specification', () => {
     assert.isNull(classC.attribute, 'classC.attribute is null');
   });
 
-  it('SimpleConfigProperty is autowired from config', () => {
+  it('SimpleConfigProperty is autowired from config', async() => {
     const ephemeralConfig = new EphemeralConfig(
       {
         pathtovalue: 1,
@@ -74,7 +74,7 @@ describe('Wiring Specification', () => {
     );
 
     const applicationContext = new ApplicationContext({ config: ephemeralConfig });
-    applicationContext.start();
+    await applicationContext.start();
 
     const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
     assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
@@ -82,55 +82,55 @@ describe('Wiring Specification', () => {
     assert.equal(simpleConfigProperty.attribute, 1, 'simpleClass.attribute == 1');
   });
 
-  // it('SimpleConfigProperty is autowired from config by default', () => {
-  //   const ephemeralConfig = new EphemeralConfig(
-  //     {
-  //       context: {
-  //         SimpleConfigProperty: {
-  //           require: './test/service/SimpleConfigProperty.js',
-  //         },
-  //       },
-  //     },
-  //   );
-  //
-  //   const applicationContext = new ApplicationContext({ config: ephemeralConfig });
-  //   applicationContext.start();
-  //
-  //   const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
-  //   assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
-  //   assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
-  //   assert.equal(simpleConfigProperty.attribute, 2, 'simpleClass.attribute == 1');
-  // });
+  it('SimpleConfigProperty is autowired from config by default', async () => {
+    const ephemeralConfig = new EphemeralConfig(
+      {
+        context: {
+          SimpleConfigProperty: {
+            require: './test/service/SimpleConfigProperty.js',
+          },
+        },
+      },
+    );
 
-  // it('NoDefaultConfigProperty is autowired from config', () => {
-  //   const ephemeralConfig = new EphemeralConfig(
-  //     {
-  //       pathtovalue: 1,
-  //       context: {
-  //         SimpleConfigProperty: {
-  //           require: './test/service/NoDefaultConfigProperty.js',
-  //         },
-  //       },
-  //     },
-  //   );
-  //
-  //   const applicationContext = new ApplicationContext({ config: ephemeralConfig });
-  //   applicationContext.start();
-  //
-  //   const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
-  //   assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
-  //   assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
-  //   assert.equal(simpleConfigProperty.attribute, 1, 'simpleClass.attribute == 1');
-  // });
+    const applicationContext = new ApplicationContext({ config: ephemeralConfig });
+    await applicationContext.start();
 
-  it('SimpleConfigProperty is wired from context Property definition', () => {
+    const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
+    assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
+    assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
+    assert.equal(simpleConfigProperty.attribute, 2, 'simpleClass.attribute == 1');
+  });
+
+  it('NoDefaultConfigProperty is autowired from config', async () => {
+    const ephemeralConfig = new EphemeralConfig(
+      {
+        pathtovalue: 1,
+        context: {
+          SimpleConfigProperty: {
+            require: './test/service/NoDefaultConfigProperty.js',
+          },
+        },
+      },
+    );
+
+    const applicationContext = new ApplicationContext({ config: ephemeralConfig });
+    await applicationContext.start();
+
+    const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
+    assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
+    assert.exists(simpleConfigProperty.attribute, 'simpleClass.attribute exists');
+    assert.equal(simpleConfigProperty.attribute, 1, 'simpleClass.attribute == 1');
+  });
+
+  it('SimpleConfigProperty is wired from context Property definition', async () => {
     const context = new Context([new Component({
       Reference: SimpleConfigProperty,
       properties: [new Property({ name: 'attribute', value: 3 })],
     })]);
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await applicationContext.start();
 
     const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
     assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');
@@ -138,14 +138,14 @@ describe('Wiring Specification', () => {
     assert.equal(simpleConfigProperty.attribute, 3, 'simpleClass.attribute == 3');
   });
 
-  it('SimpleConfigProperty is wired from context property object', () => {
+  it('SimpleConfigProperty is wired from context property object', async() => {
     const context = new Context([new Component({
       Reference: SimpleConfigProperty,
       properties: [{ name: 'attribute', value: 3 }],
     })]);
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await applicationContext.start();
 
     const simpleConfigProperty = applicationContext.get('simpleConfigProperty');
     assert.exists(simpleConfigProperty, 'simpleConfigProperty exists');

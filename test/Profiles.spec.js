@@ -30,11 +30,11 @@ beforeEach(async () => {
 });
 
 describe('Profile Specification', () => {
-  it('Component with no profile is active when active profiles set', () => {
+  it('Component with no profile is active when active profiles set', async () => {
     const context = { name: 'SimpleClass', attr: 'value' };
 
     const applicationContext = new ApplicationContext({ contexts: context, profiles: 'default' });
-    applicationContext.start();
+    await applicationContext.start();
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');

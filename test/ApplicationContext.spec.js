@@ -63,70 +63,70 @@ describe('ApplicationContext Specification', () => {
     await assert.isRejected(applicationContext.start(), Error, 'Duplicate definition of application context component (simpleClass)');
   });
 
-  it('ApplicationContext accepts Context array', () => {
+  it('ApplicationContext accepts Context array', async () => {
     const context = new Context([new Component(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await applicationContext.start();
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('ApplicationContext accepts Context object', () => {
+  it('ApplicationContext accepts Context object', async () => {
     const context = new Context(new Component(SimpleClass));
 
     const applicationContext = new ApplicationContext(context);
-    applicationContext.start();
+    await applicationContext.start();
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('ApplicationContext accepts Component object', () => {
+  it('ApplicationContext accepts Component object', async () => {
     const context = new Component(SimpleClass);
 
     const applicationContext = new ApplicationContext(context);
-    applicationContext.start();
+    await applicationContext.start();
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('ApplicationContext accepts plain old class', () => {
+  it('ApplicationContext accepts plain old class', async () => {
     const context = SimpleClass;
 
     const applicationContext = new ApplicationContext(context);
-    applicationContext.start();
+    await applicationContext.start();
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('ApplicationContext accepts plain old object', () => {
+  it('ApplicationContext accepts plain old object', async () => {
     const context = { name: 'SimpleClass', uuid: uuidv4() };
 
     const applicationContext = new ApplicationContext(context);
-    applicationContext.start();
+    await applicationContext.start();
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  // it('ApplicationContext accepts plain old object, with require', () => {
-  //   const context = { name: 'SimpleClass',
-  //     require: './test/service/SimpleClass',
-  //   };
-  //
-  //   const applicationContext = new ApplicationContext(context);
-  //   applicationContext.start();
-  //
-  //   const simpleClass = applicationContext.get('simpleClass');
-  //   assert.exists(simpleClass, 'simpleClass exists');
-  //   assert.exists(simpleClass.uuid, 'simpleClass.uuid exists');
-  // });
+  it('ApplicationContext accepts plain old object, with require',  async() => {
+    const context = { name: 'SimpleClass',
+      require: './test/service/SimpleClass.js',
+    };
 
-  it('ApplicationContext accepts config context', () => {
+    const applicationContext = new ApplicationContext(context);
+    await applicationContext.start();
+
+    const simpleClass = applicationContext.get('simpleClass');
+    assert.exists(simpleClass, 'simpleClass exists');
+    assert.exists(simpleClass.uuid, 'simpleClass.uuid exists');
+  });
+
+  it('ApplicationContext accepts config context', async() => {
     const ephemeralConfig = new EphemeralConfig(
       {
         context: {
@@ -136,7 +136,7 @@ describe('ApplicationContext Specification', () => {
     );
 
     const applicationContext = new ApplicationContext({ config: ephemeralConfig });
-    applicationContext.start();
+    await applicationContext.start();
 
     const simpleClass = applicationContext.get('simpleClass');
     assert.exists(simpleClass, 'simpleClass exists');

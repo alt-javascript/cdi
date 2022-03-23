@@ -163,7 +163,7 @@ describe('Prototypes Specification', () => {
     assert.equal(funcy.attr, 'value', 'funcy.attr == value');
   });
 
-  it('Simple Prototype using singleton factory function', () => {
+  it('Simple Prototype using singleton factory function', async() => {
     const context = new Context([
       {
         name: 'singletonFactory',
@@ -177,13 +177,13 @@ describe('Prototypes Specification', () => {
       })]);
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await applicationContext.start();
     const factoryProto = applicationContext.get('factoryProto');
     assert.exists(factoryProto, 'factoryProto exists');
     assert.equal(factoryProto.attr, 'one', 'factoryProto.attr == one');
   });
 
-  it('Simple Singleton wires logger prototype with wireFactory', () => {
+  it('Simple Singleton wires logger prototype with wireFactory', async () => {
     const context = new Context(
       {
         name: 'simpleSingleton',
@@ -193,7 +193,7 @@ describe('Prototypes Specification', () => {
     );
 
     const applicationContext = new ApplicationContext([context]);
-    applicationContext.start();
+    await applicationContext.start();
     const simpleSingleton = applicationContext.get('simpleSingleton');
     assert.exists(simpleSingleton, 'simpleSingleton exists');
     assert.exists(simpleSingleton.logger, 'simpleSingleton.logger exists');

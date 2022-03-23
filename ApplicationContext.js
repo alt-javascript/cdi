@@ -66,12 +66,12 @@ export default class ApplicationContext {
   }
 
   async start() {
-    return this.lifeCycle();
+    await this.lifeCycle();
   }
 
   async lifeCycle() {
     this.logger.verbose(`ApplicationContext (${this.name}) lifecycle started.`);
-    this.parseContexts();
+    await this.parseContexts();
     this.createSingletons();
     this.injectSingletonDependencies();
     this.initialiseSingletons();
@@ -129,15 +129,15 @@ export default class ApplicationContext {
     this.logger.verbose('Detecting global context components completed.');
   }
 
-  parseContexts() {
+  async parseContexts() {
     this.logger.verbose('Parsing configured contexts started.');
     this.detectConfigContext();
     for (let i = 0; i < this.contexts.length; i++) {
       if (this.contexts[i]) {
         if (this.contexts[i]?.constructor?.name === 'Context') {
-          this.parseContextComponents(this.contexts[i]);
+          await this.parseContextComponents(this.contexts[i]);
         } else {
-          this.parseContextComponents(new Context(this.contexts[i]));
+          await this.parseContextComponents(new Context(this.contexts[i]));
         }
       } else {
         const msg = `ApplicationContext (${this.name}) received a nullish context.`;
@@ -149,33 +149,33 @@ export default class ApplicationContext {
     this.logger.verbose('Parsing configured contexts completed.');
   }
 
-  deriveContextComponent(contextComponent) {
+  async deriveContextComponent(contextComponent) {
     if (contextComponent.name || contextComponent.Reference || contextComponent.factory) {
-      this.parseContextComponent(contextComponent);
+      await this.parseContextComponent(contextComponent);
     } else {
       const contextKeys = Object.keys(contextComponent);
       for (let i = 0; i < contextKeys.length; i++) {
         const name = contextKeys[i];
         const component = contextComponent[name];
         component.name = name;
-        this.parseContextComponent(component);
+        await this.parseContextComponent(component);
       }
     }
   }
 
-  parseContextComponents(context) {
+  async parseContextComponents(context) {
     this.logger.verbose('Processing context components started');
     if (context.components) {
       if (Array.isArray(context.components)) {
         for (let i = 0; i < context.components.length; i++) {
-          this.deriveContextComponent(context.components[i]);
+          await this.deriveContextComponent(context.components[i]);
         }
       }
     }
     this.logger.verbose('Processing context components completed');
   }
 
-  parseContextComponent(componentArg) {
+  async parseContextComponent(componentArg) {
     let component = componentArg;
     if (component?.constructor?.name !== 'Component'
         && component?.constructor?.name !== 'Singleton'
@@ -202,12 +202,16 @@ export default class ApplicationContext {
     $component.wireFactory = component.wireFactory;
     // TODO - dynamic import (async)
     if (component.require) {
+      try{
       // eslint-disable-next-line
-      // import(component.require).then(
-      //   (module) => { $component.Reference = module.default(); },
-      // );
-      // $component.isClass = ($component?.Reference?.prototype?.constructor !== undefined);
+        let module = await import(component.require);
+        $component.Reference = module.default;
+        $component.isClass = ($component?.Reference?.prototype?.constructor !== undefined);
+      } catch (err) {
+      this.logger.error(err);
+      }
     }
+
 
     $component.properties = component.properties || constructr?.properties;
     $component.profiles = component.profiles || constructr?.profiles;
