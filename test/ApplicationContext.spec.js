@@ -113,8 +113,9 @@ describe('ApplicationContext Specification', () => {
     assert.exists(simpleClass, 'simpleClass exists');
   });
 
-  it('ApplicationContext accepts plain old object, with require',  async() => {
-    const context = { name: 'SimpleClass',
+  it('ApplicationContext accepts plain old object, with require', async () => {
+    const context = {
+      name: 'SimpleClass',
       require: './test/service/SimpleClass.js',
     };
 
@@ -126,7 +127,7 @@ describe('ApplicationContext Specification', () => {
     assert.exists(simpleClass.uuid, 'simpleClass.uuid exists');
   });
 
-  it('ApplicationContext accepts config context', async() => {
+  it('ApplicationContext accepts config context', async () => {
     const ephemeralConfig = new EphemeralConfig(
       {
         context: {

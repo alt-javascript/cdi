@@ -135,8 +135,10 @@ export default class ApplicationContext {
     for (let i = 0; i < this.contexts.length; i++) {
       if (this.contexts[i]) {
         if (this.contexts[i]?.constructor?.name === 'Context') {
+          // eslint-disable-next-line no-await-in-loop
           await this.parseContextComponents(this.contexts[i]);
         } else {
+          // eslint-disable-next-line no-await-in-loop
           await this.parseContextComponents(new Context(this.contexts[i]));
         }
       } else {
@@ -158,6 +160,7 @@ export default class ApplicationContext {
         const name = contextKeys[i];
         const component = contextComponent[name];
         component.name = name;
+        // eslint-disable-next-line no-await-in-loop
         await this.parseContextComponent(component);
       }
     }
@@ -168,6 +171,7 @@ export default class ApplicationContext {
     if (context.components) {
       if (Array.isArray(context.components)) {
         for (let i = 0; i < context.components.length; i++) {
+          // eslint-disable-next-line no-await-in-loop
           await this.deriveContextComponent(context.components[i]);
         }
       }
@@ -202,16 +206,15 @@ export default class ApplicationContext {
     $component.wireFactory = component.wireFactory;
     // TODO - dynamic import (async)
     if (component.require) {
-      try{
+      try {
       // eslint-disable-next-line
         let module = await import(component.require);
         $component.Reference = module.default;
         $component.isClass = ($component?.Reference?.prototype?.constructor !== undefined);
       } catch (err) {
-      this.logger.error(err);
+        this.logger.error(err);
       }
     }
-
 
     $component.properties = component.properties || constructr?.properties;
     $component.profiles = component.profiles || constructr?.profiles;

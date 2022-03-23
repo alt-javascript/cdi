@@ -39,7 +39,7 @@ beforeEach(async () => {
 });
 
 describe('Wiring Specification', () => {
-  it('Classes A & B exist and are autowired by default', async() => {
+  it('Classes A & B exist and are autowired by default', async () => {
     const context = new Context([
       new Component(ClassA),
       new Component(ClassB),
@@ -60,7 +60,7 @@ describe('Wiring Specification', () => {
     assert.isNull(classC.attribute, 'classC.attribute is null');
   });
 
-  it('SimpleConfigProperty is autowired from config', async() => {
+  it('SimpleConfigProperty is autowired from config', async () => {
     const ephemeralConfig = new EphemeralConfig(
       {
         pathtovalue: 1,
@@ -138,7 +138,7 @@ describe('Wiring Specification', () => {
     assert.equal(simpleConfigProperty.attribute, 3, 'simpleClass.attribute == 3');
   });
 
-  it('SimpleConfigProperty is wired from context property object', async() => {
+  it('SimpleConfigProperty is wired from context property object', async () => {
     const context = new Context([new Component({
       Reference: SimpleConfigProperty,
       properties: [{ name: 'attribute', value: 3 }],

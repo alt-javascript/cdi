@@ -34,7 +34,7 @@ beforeEach(async () => {
 });
 
 describe('Singleton Specification', () => {
-  it('Simple Component is a singleton', async() => {
+  it('Simple Component is a singleton', async () => {
     const context = new Context([new Component(SimpleClass)]);
 
     const applicationContext = new ApplicationContext([context]);

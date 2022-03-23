@@ -163,7 +163,7 @@ describe('Prototypes Specification', () => {
     assert.equal(funcy.attr, 'value', 'funcy.attr == value');
   });
 
-  it('Simple Prototype using singleton factory function', async() => {
+  it('Simple Prototype using singleton factory function', async () => {
     const context = new Context([
       {
         name: 'singletonFactory',
