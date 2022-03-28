@@ -65,18 +65,26 @@ export default class ApplicationContext {
     this.logger = LoggerFactory.getLogger('@alt-javascript/cdi/ApplicationContext', this.config);
   }
 
-  async start() {
-    await this.lifeCycle();
+  async start(options) {
+    this.logger.verbose('Application context starting.');
+    await this.lifeCycle(options);
+    this.logger.verbose('Application context started.');
   }
 
-  async lifeCycle() {
+  async lifeCycle(options) {
     this.logger.verbose(`ApplicationContext (${this.name}) lifecycle started.`);
+    await this.prepare();
+    return this.run(options);
+  }
+
+  async prepare() {
+    this.logger.verbose(`ApplicationContext (${this.name}) lifecycle prepare phase started.`);
     await this.parseContexts();
     this.createSingletons();
     this.injectSingletonDependencies();
     this.initialiseSingletons();
     this.registerSingletonDestroyers();
-    return this.run();
+    this.logger.verbose(`ApplicationContext (${this.name}) lifecycle prepare phase completed.`);
   }
 
   detectConfigContext() {
@@ -430,19 +438,27 @@ export default class ApplicationContext {
     this.logger.verbose('Registering singleton destroyers completed');
   }
 
-  async run() {
-    const keys = Object.keys(this.components);
-    for (let i = 0; i < keys.length; i++) {
-      const component = this.components[keys[i]];
-      if (component.scope === Scopes.SINGLETON) {
-        if (typeof component.instance.run === 'function') {
-          component.instance.run();
-        } else if (typeof component.run === 'string') {
-          component.instance[component.run]();
+  async run(options) {
+    if (null || options || options?.run) {
+      this.logger.verbose(`ApplicationContext (${this.name}) lifecycle run phase started.`);
+
+      const keys = Object.keys(this.components);
+      for (let i = 0; i < keys.length; i++) {
+        const component = this.components[keys[i]];
+        if (component.scope === Scopes.SINGLETON) {
+          if (typeof component.run === 'string') {
+            component.instance[component.run]();
+          } else if (typeof component.instance.run === 'function') {
+            component.instance.run();
+          }
         }
+
+        this.logger.verbose(`ApplicationContext (${this.name}) lifecycle run phase completed.`);
       }
+    } else {
+      this.logger.verbose(`ApplicationContext (${this.name}) skipping lifecycle run phase.`);
     }
-    this.logger.verbose('Application context started');
+    this.logger.verbose(`ApplicationContext (${this.name}) lifecycle completed.`);
   }
 
   get(reference, defaultValue, targetArgs) {
