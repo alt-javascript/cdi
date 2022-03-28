@@ -1,7 +1,7 @@
 2.0.1 / 2022-03-28
 ==================
 
-* Separate lifeclye into prepare and run - @craigparra
+* Separate lifecycle into prepare and run - @craigparra
 
 2.0.0 / 2022-03-11
 ==================
