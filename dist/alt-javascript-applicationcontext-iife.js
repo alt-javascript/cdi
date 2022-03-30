@@ -112,18 +112,26 @@ var ApplicationContext = (function (_, LoggerFactory, ConfigFactory) {
         this.logger = LoggerFactory__default.getLogger('@alt-javascript/cdi/ApplicationContext', this.config);
       }
 
-      async start() {
-        await this.lifeCycle();
+      async start(options) {
+        this.logger.verbose('Application context starting.');
+        await this.lifeCycle(options);
+        this.logger.verbose('Application context started.');
       }
 
-      async lifeCycle() {
+      async lifeCycle(options) {
         this.logger.verbose(`ApplicationContext (${this.name}) lifecycle started.`);
+        await this.prepare();
+        return this.run(options);
+      }
+
+      async prepare() {
+        this.logger.verbose(`ApplicationContext (${this.name}) lifecycle prepare phase started.`);
         await this.parseContexts();
         this.createSingletons();
         this.injectSingletonDependencies();
         this.initialiseSingletons();
         this.registerSingletonDestroyers();
-        return this.run();
+        this.logger.verbose(`ApplicationContext (${this.name}) lifecycle prepare phase completed.`);
       }
 
       detectConfigContext() {
@@ -182,8 +190,10 @@ var ApplicationContext = (function (_, LoggerFactory, ConfigFactory) {
         for (let i = 0; i < this.contexts.length; i++) {
           if (this.contexts[i]) {
             if (this.contexts[i]?.constructor?.name === 'Context') {
+              // eslint-disable-next-line no-await-in-loop
               await this.parseContextComponents(this.contexts[i]);
             } else {
+              // eslint-disable-next-line no-await-in-loop
               await this.parseContextComponents(new Context(this.contexts[i]));
             }
           } else {
@@ -205,6 +215,7 @@ var ApplicationContext = (function (_, LoggerFactory, ConfigFactory) {
             const name = contextKeys[i];
             const component = contextComponent[name];
             component.name = name;
+            // eslint-disable-next-line no-await-in-loop
             await this.parseContextComponent(component);
           }
         }
@@ -215,6 +226,7 @@ var ApplicationContext = (function (_, LoggerFactory, ConfigFactory) {
         if (context.components) {
           if (Array.isArray(context.components)) {
             for (let i = 0; i < context.components.length; i++) {
+              // eslint-disable-next-line no-await-in-loop
               await this.deriveContextComponent(context.components[i]);
             }
           }
@@ -249,16 +261,15 @@ var ApplicationContext = (function (_, LoggerFactory, ConfigFactory) {
         $component.wireFactory = component.wireFactory;
         // TODO - dynamic import (async)
         if (component.require) {
-          try{
+          try {
           // eslint-disable-next-line
             let module = await import(component.require);
             $component.Reference = module.default;
             $component.isClass = ($component?.Reference?.prototype?.constructor !== undefined);
           } catch (err) {
-          this.logger.error(err);
+            this.logger.error(err);
           }
         }
-
 
         $component.properties = component.properties || constructr?.properties;
         $component.profiles = component.profiles || constructr?.profiles;
@@ -474,19 +485,27 @@ var ApplicationContext = (function (_, LoggerFactory, ConfigFactory) {
         this.logger.verbose('Registering singleton destroyers completed');
       }
 
-      async run() {
-        const keys = Object.keys(this.components);
-        for (let i = 0; i < keys.length; i++) {
-          const component = this.components[keys[i]];
-          if (component.scope === Scopes.SINGLETON) {
-            if (typeof component.instance.run === 'function') {
-              component.instance.run();
-            } else if (typeof component.run === 'string') {
-              component.instance[component.run]();
+      async run(options) {
+        if ( !(options) || options?.run) {
+          this.logger.verbose(`ApplicationContext (${this.name}) lifecycle run phase started.`);
+
+          const keys = Object.keys(this.components);
+          for (let i = 0; i < keys.length; i++) {
+            const component = this.components[keys[i]];
+            if (component.scope === Scopes.SINGLETON) {
+              if (typeof component.run === 'string') {
+                component.instance[component.run]();
+              } else if (typeof component.instance.run === 'function') {
+                component.instance.run();
+              }
             }
+
+            this.logger.verbose(`ApplicationContext (${this.name}) lifecycle run phase completed.`);
           }
+        } else {
+          this.logger.verbose(`ApplicationContext (${this.name}) skipping lifecycle run phase.`);
         }
-        this.logger.verbose('Application context started');
+        this.logger.verbose(`ApplicationContext (${this.name}) lifecycle completed.`);
       }
 
       get(reference, defaultValue, targetArgs) {

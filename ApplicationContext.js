@@ -439,7 +439,7 @@ export default class ApplicationContext {
   }
 
   async run(options) {
-    if (null || options || options?.run) {
+    if (!(options) || options?.run) {
       this.logger.verbose(`ApplicationContext (${this.name}) lifecycle run phase started.`);
 
       const keys = Object.keys(this.components);
